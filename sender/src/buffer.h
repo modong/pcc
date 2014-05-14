@@ -50,7 +50,7 @@ written by
 class CSndBuffer
 {
 public:
-   CSndBuffer(int size = 32, int mss = 1500);
+   CSndBuffer(const int& size = 64, const int& mss = 1500);
    ~CSndBuffer();
 
       // Functionality:
@@ -63,7 +63,7 @@ public:
       // Returned value:
       //    None.
 
-   void addBuffer(const char* data, int len, int ttl = -1, bool order = false);
+   void addBuffer(const char* data, const int& len, const int& ttl = -1, const bool& order = false);
 
       // Functionality:
       //    Read a block of data from file and insert it into the sending list.
@@ -73,7 +73,7 @@ public:
       // Returned value:
       //    actual size of data added from the file.
 
-   int addBufferFromFile(std::fstream& ifs, int len);
+   int addBufferFromFile(std::fstream& ifs, const int& len);
 
       // Functionality:
       //    Find data position to pack a DATA packet from the furthest reading point.
@@ -104,7 +104,7 @@ public:
       // Returned value:
       //    None.
 
-   void ackData(int offset);
+   void ackData(const int& offset);
 
       // Functionality:
       //    Read size of data still in the sending list.
@@ -127,23 +127,26 @@ private:
       int m_iLength;                    // length of the block
 
       int32_t m_iMsgNo;                 // message number
+      int32_t m_iBufferNo;
       uint64_t m_OriginTime;            // original request time
       int m_iTTL;                       // time to live (milliseconds)
 
       Block* m_pNext;                   // next block
-   } *m_pBlock, *m_pFirstBlock, *m_pCurrBlock, *m_pLastBlock;
+   } *m_pBlock, *m_pFirstBlock, *m_pCurrBlock, *m_pLastBlock, *blockEnder;
 
    // m_pBlock:         The head pointer
    // m_pFirstBlock:    The first block
    // m_pCurrBlock:	The current block
    // m_pLastBlock:     The last block (if first == last, buffer is empty)
+   int FirstBlock;   
 
    struct Buffer
    {
+      Block* first_block;
       char* m_pcData;			// buffer
       int m_iSize;			// size
       Buffer* m_pNext;			// next buffer
-   } *m_pBuffer;			// physical buffer
+   } *m_pBuffer, *FirstBuffer, *bufferEnder;			// physical buffer
 
    int32_t m_iNextMsgNo;                // next message number
 
@@ -155,6 +158,8 @@ private:
 private:
    CSndBuffer(const CSndBuffer&);
    CSndBuffer& operator=(const CSndBuffer&);
+   //Block* findBlock(int offset);
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -162,7 +167,7 @@ private:
 class CRcvBuffer
 {
 public:
-   CRcvBuffer(CUnitQueue* queue, int bufsize = 65536);
+   CRcvBuffer(CUnitQueue* queue, const int& bufsize = 65536);
    ~CRcvBuffer();
 
       // Functionality:
@@ -183,7 +188,7 @@ public:
       // Returned value:
       //    size of data read.
 
-   int readBuffer(char* data, int len);
+   int readBuffer(char* data, const int& len);
 
       // Functionality:
       //    Read data directly into file.
@@ -193,7 +198,7 @@ public:
       // Returned value:
       //    size of data read.
 
-   int readBufferToFile(std::fstream& ofs, int len);
+   int readBufferToFile(std::fstream& ofs, const int& len);
 
       // Functionality:
       //    Update the ACK point of the buffer.
@@ -202,7 +207,7 @@ public:
       // Returned value:
       //    1 if a user buffer is fulfilled, otherwise 0.
 
-   void ackData(int len);
+   void ackData(const int& len);
 
       // Functionality:
       //    Query how many buffer space left for data receiving.
@@ -229,7 +234,7 @@ public:
       // Returned value:
       //    None.
 
-   void dropMsg(int32_t msgno);
+   void dropMsg(const int32_t& msgno);
 
       // Functionality:
       //    read a message.
@@ -239,7 +244,7 @@ public:
       // Returned value:
       //    actuall size of data read.
 
-   int readMsg(char* data, int len);
+   int readMsg(char* data, const int& len);
 
       // Functionality:
       //    Query how many messages are available now.
