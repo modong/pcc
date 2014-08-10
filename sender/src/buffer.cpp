@@ -493,6 +493,9 @@ cout << "end increase\n";*/
 
 	// insert the new blocks onto the existing one
 	pb->m_iBufferNo = bufferNo;
+	if (!bufferNo) {
+		first_block = pb;
+	}
 	pb->m_pNext = prev_first_block->m_pNext;
    	prev_first_block->m_pNext = nblk;
 //   	cout << prev_first_block << " " << m_pFirstBlock << " " << pb << " " << nblk << endl;
