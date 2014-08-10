@@ -204,7 +204,7 @@ public:
 						rand_dir = (rand()%2*2-1);
 						rate_bucket[i] = current_rate + rand_dir*continous_guess_count*GRANULARITY*current_rate;
 						rate_bucket[++i] = current_rate - rand_dir*continous_guess_count*GRANULARITY*current_rate;
-                                               //cerr<<"guess rate"<<rate_bucket[i-1]<<" "<<rate_bucket[i]<<endl; 
+                                               //cerr<<"guess rate"<<rate_bucket[i-1]<<" "<<rate_bucket[i]<<endl;
 					}
 					for(int i = 0; i < NUMBER_OF_PROBE; i++){
 						monitor_bucket[i] = (current_monitor + i) % MAX_MONITOR_NUMBER;
@@ -227,7 +227,7 @@ public:
                                 //cerr<<"CONTINOUS send"<<endl;
                                 if(continous_send_count == 1){
                                         setRate(current_rate);
-  
+
                                 }
 				if(continous_send_count < MAX_COUNTINOUS_SEND){
 					continous_send_count++;
@@ -249,7 +249,6 @@ public:
 		double utility;
 		double t=total;
 		double l=loss;
-		int random_direciton;
 		if(l<0)
 			l=0;
 utility = ((t-l)/time-20*l/time);

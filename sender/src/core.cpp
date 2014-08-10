@@ -1516,7 +1516,7 @@ int64_t CUDT::sendfile(fstream& ifs, int64_t& offset, const int64_t& size, const
                 cout<<tosend<<endl;
 		// insert this socket to snd list if it is not on the list yet
 		m_pSndQueue->m_pSndUList->update(this, false);
-               
+
 		//cout<<"sendfileupdate"<<endl;
 	}
 	//cout<<"last seq"<<m_iSndCurrSeqNo<<endl;
@@ -2092,7 +2092,7 @@ void CUDT::processCtrl(CPacket& ctrlpkt)
 		//TODO this part does not consider the situation when sequence number wrapped
 		while(itr_loss_record2 != loss_record2.end()){
                 //        cout<<*itr_loss_record2<<endl;
-                        
+
 			if(CSeqNo::seqcmp(const_cast<int32_t&>(*itr_loss_record2),const_cast<int32_t&>(ack))<0){
                           itr_mark1 = itr_loss_record1;
                           itr_mark2 = itr_loss_record2;
@@ -2147,7 +2147,7 @@ void CUDT::processCtrl(CPacket& ctrlpkt)
 		// Update RTT
 		m_iRTT = *((int32_t *)ctrlpkt.m_pcData + 1);
 		m_iRTTVar = *((int32_t *)ctrlpkt.m_pcData + 2);
-		int rtt = *((int32_t *)ctrlpkt.m_pcData + 1);
+		//int rtt = *((int32_t *)ctrlpkt.m_pcData + 1);
 		//m_iRTTVar = (m_iRTTVar * 3 + abs(rtt - m_iRTT)) >> 2;
 		//m_iRTT = (m_iRTT * 7 + rtt) >> 3;
 
@@ -2380,7 +2380,7 @@ void CUDT::processCtrl(CPacket& ctrlpkt)
                 if(latency_time_start[Mon] == 0){
                 latency_time_start[Mon]=ctrlpkt.m_iTimeStamp;
                 latency_seq_start[Mon] = tsn_payload[last_position] & 0xFFFF;
-                } 
+                }
                 else{
                 latency_time_end[Mon] = ctrlpkt.m_iTimeStamp;
                 latency_seq_end[Mon] = tsn_payload[last_position] & 0xFFFF;
@@ -2463,7 +2463,7 @@ int CUDT::packData(CPacket& packet, uint64_t& ts)
 			return 0;
 //		cout<<"pack loss"<<offset<<endl;
 		int msglen;
-		struct timeval begin,end;
+		//struct timeval begin,end;
 		//gettimeofday(&begin,NULL);
 		payload = m_pSndBuffer->readData(&(packet.m_pcData), offset, packet.m_iMsgNo, msglen);
 		//gettimeofday(&end,NULL);
@@ -2574,7 +2574,7 @@ m_pSndLossList->insert(const_cast<int32_t&>(m_iSndLastAck), const_cast<int32_t&>
 //second step: add data from the tail of the vector, insert all of them to lost list
 //third step: pack a data and send out in this step
 //fourth step: do the timing control right, don't let packData wait for a very long time
-				int msglen;
+				//int msglen;
 				if(!loss_record1.empty()){
 //					pthread_mutex_lock(&m_LossrecordLock);
 //					itr_loss_record1 = loss_record1.begin();
@@ -2603,7 +2603,7 @@ m_pSndLossList->insert(const_cast<int32_t&>(m_iSndLastAck), const_cast<int32_t&>
 
 				}
 				else{
-                                                m_pSndLossList->insert(const_cast<int32_t&>(m_iSndCurrSeqNo), const_cast<int32_t&>(m_iSndCurrSeqNo));      
+                                                m_pSndLossList->insert(const_cast<int32_t&>(m_iSndCurrSeqNo), const_cast<int32_t&>(m_iSndCurrSeqNo));
 //                                      cout<<"inserting tail2 "<<m_pSndLossList->getLostSeq()<<endl;
                                      }
 /*		if (m_ullTimeDiff >= m_ullInterval)
@@ -2613,14 +2613,14 @@ m_pSndLossList->insert(const_cast<int32_t&>(m_iSndLastAck), const_cast<int32_t&>
                         cout<<"Hurry!"<<m_ullTimeDiff<<" "<<m_ullInterval<<endl;
 		}
 		else
-		{      
+		{
 			ts = entertime + m_ullInterval - m_ullTimeDiff;
 			m_ullTimeDiff = 0;
 		}
 */
                 ts = entertime +500* m_ullCPUFrequency; // m_ullInterval;
                 m_ullTargetTime = ts;
-                return 0; 
+                return 0;
 #else
                 ts = entertime +500* m_ullCPUFrequency; // m_ullInterval;
                 m_ullTargetTime = ts;

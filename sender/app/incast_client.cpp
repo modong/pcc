@@ -64,7 +64,6 @@ windowsize=data_length;//rand()%900+100;
 
 
 UDT::startup();
- UDT::TRACEINFO perf;
 
    struct addrinfo hints, *local, *peer;
 
@@ -134,7 +133,6 @@ UDT::startup();
 //cchandle->m_dCWndSize=windowsize+100;
 //cout<<cchandle->m_dCWndSize<<endl;
 
-   int k;
 
 //cout<<"k"<<cchandle->m_dCWndSize<<endl;
    int usize = 1456;
@@ -162,7 +160,6 @@ char* data = new char[size];
 
       int ssize = 0;
       int ss=0;
-      int times=0;
 	do {
 		gettimeofday(&current, NULL);
 		if (current.tv_sec>=start_s+2 && current.tv_usec>=start_us)
@@ -210,7 +207,7 @@ UDT::close(client);
    UDT::cleanup();
 //cout<<"TIME,"<<time<<endl;
 sleep(3);
-
+return NULL;
 }
 #ifndef WIN32
 void* monitor(void* s)

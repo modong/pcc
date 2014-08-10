@@ -328,13 +328,13 @@ void CUDT::setOpt(UDTOpt optName, const void* optval, int)
       m_bRendezvous = *(bool *)optval;
       break;
 
-   case UDT_SNDTIMEO: 
-      m_iSndTimeOut = *(int*)optval; 
-      break; 
-    
-   case UDT_RCVTIMEO: 
-      m_iRcvTimeOut = *(int*)optval; 
-      break; 
+   case UDT_SNDTIMEO:
+      m_iSndTimeOut = *(int*)optval;
+      break;
+
+   case UDT_RCVTIMEO:
+      m_iRcvTimeOut = *(int*)optval;
+      break;
 
    case UDT_REUSEADDR:
       if (m_bOpened)
@@ -345,7 +345,7 @@ void CUDT::setOpt(UDTOpt optName, const void* optval, int)
    case UDT_MAXBW:
       m_llMaxBW = *(int64_t*)optval;
       break;
-    
+
    default:
       throw CUDTException(5, 0, 0);
    }
@@ -418,15 +418,15 @@ void CUDT::getOpt(UDTOpt optName, void* optval, int& optlen)
       optlen = sizeof(bool);
       break;
 
-   case UDT_SNDTIMEO: 
-      *(int*)optval = m_iSndTimeOut; 
-      optlen = sizeof(int); 
-      break; 
-    
-   case UDT_RCVTIMEO: 
-      *(int*)optval = m_iRcvTimeOut; 
-      optlen = sizeof(int); 
-      break; 
+   case UDT_SNDTIMEO:
+      *(int*)optval = m_iSndTimeOut;
+      optlen = sizeof(int);
+      break;
+
+   case UDT_RCVTIMEO:
+      *(int*)optval = m_iRcvTimeOut;
+      optlen = sizeof(int);
+      break;
 
    case UDT_REUSEADDR:
       *(bool *)optval = m_bReuseAddr;
@@ -523,7 +523,7 @@ void CUDT::open()
 
    // set up the timers
    m_ullSYNInt = m_iSYNInterval * m_ullCPUFrequency;
-  
+
    // set minimum NAK and EXP timeout to 100ms
    m_ullMinNakInt = 250000 * m_ullCPUFrequency;
    m_ullMinExpInt = 250000 * m_ullCPUFrequency;
@@ -815,7 +815,7 @@ void CUDT::connect(const sockaddr* peer, CHandShake* hs)
 {
    CGuard cg(m_ConnectionLock);
 
-   // Uses the smaller MSS between the peers        
+   // Uses the smaller MSS between the peers
    if (hs->m_iMSS > m_iMSS)
       hs->m_iMSS = m_iMSS;
    else
@@ -850,7 +850,7 @@ void CUDT::connect(const sockaddr* peer, CHandShake* hs)
    // get local IP address and send the peer its IP address (because UDP cannot get local IP address)
    memcpy(m_piSelfIP, hs->m_piPeerIP, 16);
    CIPAddress::ntop(peer, hs->m_piPeerIP, m_iIPversion);
-  
+
    m_iPktSize = m_iMSS - 28;
    m_iPayloadSize = m_iPktSize - CPacket::m_iPktHdrSize;
 
@@ -1044,16 +1044,16 @@ int CUDT::send(const char* data, int len)
          // wait here during a blocking sending
          #ifndef WIN32
             pthread_mutex_lock(&m_SendBlockLock);
-            if (m_iSndTimeOut < 0) 
-            { 
+            if (m_iSndTimeOut < 0)
+            {
                while (!m_bBroken && m_bConnected && !m_bClosing && (m_iSndBufSize <= m_pSndBuffer->getCurrBufSize()) && m_bPeerHealth)
                   pthread_cond_wait(&m_SendBlockCond, &m_SendBlockLock);
             }
             else
             {
                uint64_t exptime = CTimer::getTime() + m_iSndTimeOut * 1000ULL;
-               timespec locktime; 
-    
+               timespec locktime;
+
                locktime.tv_sec = exptime / 1000000;
                locktime.tv_nsec = (exptime % 1000000) * 1000;
 
@@ -1067,12 +1067,12 @@ int CUDT::send(const char* data, int len)
                while (!m_bBroken && m_bConnected && !m_bClosing && (m_iSndBufSize <= m_pSndBuffer->getCurrBufSize()) && m_bPeerHealth)
                   WaitForSingleObject(m_SendBlockCond, INFINITE);
             }
-            else 
+            else
             {
                uint64_t exptime = CTimer::getTime() + m_iSndTimeOut * 1000ULL;
 
                while (!m_bBroken && m_bConnected && !m_bClosing && (m_iSndBufSize <= m_pSndBuffer->getCurrBufSize()) && m_bPeerHealth && (CTimer::getTime() < exptime))
-                  WaitForSingleObject(m_SendBlockCond, DWORD((exptime - CTimer::getTime()) / 1000)); 
+                  WaitForSingleObject(m_SendBlockCond, DWORD((exptime - CTimer::getTime()) / 1000));
             }
          #endif
 
@@ -1092,7 +1092,7 @@ int CUDT::send(const char* data, int len)
    if (m_iSndBufSize <= m_pSndBuffer->getCurrBufSize())
    {
       if (m_iSndTimeOut >= 0)
-         throw CUDTException(6, 3, 0); 
+         throw CUDTException(6, 3, 0);
 
       return 0;
    }
@@ -1144,22 +1144,22 @@ int CUDT::recv(char* data, int len)
       {
          #ifndef WIN32
             pthread_mutex_lock(&m_RecvDataLock);
-            if (m_iRcvTimeOut < 0) 
-            { 
+            if (m_iRcvTimeOut < 0)
+            {
                while (!m_bBroken && m_bConnected && !m_bClosing && (0 == m_pRcvBuffer->getRcvDataSize()))
                   pthread_cond_wait(&m_RecvDataCond, &m_RecvDataLock);
             }
             else
             {
-               uint64_t exptime = CTimer::getTime() + m_iRcvTimeOut * 1000ULL; 
-               timespec locktime; 
-    
+               uint64_t exptime = CTimer::getTime() + m_iRcvTimeOut * 1000ULL;
+               timespec locktime;
+
                locktime.tv_sec = exptime / 1000000;
                locktime.tv_nsec = (exptime % 1000000) * 1000;
 
                while (!m_bBroken && m_bConnected && !m_bClosing && (0 == m_pRcvBuffer->getRcvDataSize()))
                {
-                  pthread_cond_timedwait(&m_RecvDataCond, &m_RecvDataLock, &locktime); 
+                  pthread_cond_timedwait(&m_RecvDataCond, &m_RecvDataLock, &locktime);
                   if (CTimer::getTime() >= exptime)
                      break;
                }
@@ -1307,7 +1307,7 @@ int CUDT::sendmsg(const char* data, int len, int msttl, bool inorder)
       s_UDTUnited.m_EPoll.update_events(m_SocketID, m_sPollID, UDT_EPOLL_OUT, false);
    }
 
-   return len;   
+   return len;
 }
 
 int CUDT::recvmsg(char* data, int len)
@@ -1373,7 +1373,7 @@ int CUDT::recvmsg(char* data, int len)
             if (pthread_cond_timedwait(&m_RecvDataCond, &m_RecvDataLock, &locktime) == ETIMEDOUT)
                timeout = true;
 
-            res = m_pRcvBuffer->readMsg(data, len);           
+            res = m_pRcvBuffer->readMsg(data, len);
          }
          pthread_mutex_unlock(&m_RecvDataLock);
       #else
@@ -1556,12 +1556,12 @@ int64_t CUDT::recvfile(fstream& ofs, int64_t& offset, int64_t size, int block)
       if (!m_bConnected)
          {cout<<"ERROR2"<<endl;throw CUDTException(2, 2, 0);}
       else if ((m_bBroken || m_bClosing) && (0 == m_pRcvBuffer->getRcvDataSize()))
-        {cout<<"ERROR3"<<endl; 
+        {cout<<"ERROR3"<<endl;
          throw CUDTException(2, 1, 0);}
 
       unitsize = int((torecv >= block) ? block : torecv);
       recvsize = m_pRcvBuffer->readBufferToFile(ofs, unitsize);
-       
+
       if (recvsize > 0)
       {  cout<<"receiving "<<torecv<<endl;
          torecv -= recvsize;
@@ -1752,7 +1752,7 @@ void CUDT::sendCtrl(int pkttype, void* lparam, void* rparam, int size)
          ack = CSeqNo::incseq(m_iRcvCurrSeqNo);
       else
          ack = m_pRcvLossList->getFirstLostSeq();
-     //TODO(Mo Dong): I don't know if this modified ACK mechanism is reasonable or not?? 
+     //TODO(Mo Dong): I don't know if this modified ACK mechanism is reasonable or not??
      //      Should we just try to adjust the rate of ACK to be sent out?
      //      The reason to send out duplicated ACK for now is to continously pass
      //      the info about receiver buffer, but I guess that can be mitigated by controlling at sender's side somehow
@@ -1809,7 +1809,7 @@ void CUDT::sendCtrl(int pkttype, void* lparam, void* rparam, int size)
             break;}
       }
       else
-         {//cout<<"strange break"<<endl; 
+         {//cout<<"strange break"<<endl;
          break;}
 
       // Send out the ACK only if has not been received by the sender before
@@ -1930,7 +1930,7 @@ void CUDT::sendCtrl(int pkttype, void* lparam, void* rparam, int size)
       ctrlpkt.pack(pkttype);
       ctrlpkt.m_iID = m_PeerID;
       m_pSndQueue->sendto(m_pPeerAddr, ctrlpkt);
- 
+
       break;
 
    case 0: //000 - Handshake
@@ -2419,7 +2419,6 @@ int CUDT::packData(CPacket& packet, uint64_t& ts)
 int CUDT::processData(CUnit* unit)
 {
    CPacket& packet = unit->m_Packet;
-   int32_t seq=packet.m_iMsgNo;
    // Just heard from the peer, reset the expiration count.
    m_iEXPCount = 1;
    uint64_t currtime;
@@ -2448,7 +2447,7 @@ int CUDT::processData(CUnit* unit)
    } else {
       tsn_payload[counter_32767-1] = packet.m_iMsgNo;
    }
-#elif LATENCY 
+#elif LATENCY
    if (counter_32767 == 1) {
       tsn_payload[counter_32767-1] = packet.m_iMsgNo;
       sendCtrl(32767, NULL, tsn_payload, 1*4);
@@ -2456,7 +2455,7 @@ int CUDT::processData(CUnit* unit)
    } else {
       tsn_payload[counter_32767-1] = packet.m_iMsgNo;
    }
-#else   
+#else
    if (counter_32767 == 20) {
       tsn_payload[counter_32767-1] = packet.m_iMsgNo;
       sendCtrl(32767, NULL, tsn_payload, 20*4);
@@ -2468,7 +2467,7 @@ int CUDT::processData(CUnit* unit)
    int32_t offset = CSeqNo::seqoff(m_iRcvLastAck, packet.m_iSeqNo);
    if ((offset < 0) || (offset >= m_pRcvBuffer->getAvailBufSize()))
       {
-       
+
         if(offset >= m_pRcvBuffer->getAvailBufSize())
            cout<<"overflow"<<endl;
         cout<<offset<<endl;
@@ -2488,7 +2487,7 @@ int CUDT::processData(CUnit* unit)
    ++ m_iRecvNAKTotal;
 
    if (m_pRcvBuffer->addData(unit, offset) < 0)
-      { //cout<<"invalid data2\n"; 
+      { //cout<<"invalid data2\n";
        return -1;}
 /*
    counter_32767++;
@@ -2529,10 +2528,10 @@ int CUDT::processData(CUnit* unit)
       m_iRcvLossTotal += loss;
    }
 
-   // This is not a regular fixed size packet...   
-   //an irregular sized packet usually indicates the end of a message, so send an ACK immediately   
-   if (packet.getLength() != m_iPayloadSize)   
-      CTimer::rdtsc(m_ullNextACKTime); 
+   // This is not a regular fixed size packet...
+   //an irregular sized packet usually indicates the end of a message, so send an ACK immediately
+   if (packet.getLength() != m_iPayloadSize)
+      CTimer::rdtsc(m_ullNextACKTime);
 
    // Update the current largest sequence number that has been received.
    // Or it is a retransmitted packet, remove it from receiver loss list.
@@ -2618,7 +2617,7 @@ int CUDT::listen(sockaddr* addr, CPacket& packet)
          }
          else
          {
-            // a new connection has been created, enable epoll for write 
+            // a new connection has been created, enable epoll for write
             s_UDTUnited.m_EPoll.update_events(m_SocketID, m_sPollID, UDT_EPOLL_OUT, true);
          }
       }
@@ -2662,14 +2661,12 @@ void CUDT::checkTimers()
    {
    //   // NAK timer expired, and there is loss to be reported.
       int locloc=m_pRcvLossList->m_iHead;
-      int flag=1;
-      int32_t lossdata[2];
       if(locloc==loss_head_loc)
          {
          sendCtrl(3);
-        
+
     //      cout<<"buch"<<endl;
-         
+
          }
       loss_head_loc=m_pRcvLossList->m_iHead;
       CTimer::rdtsc(currtime);
@@ -2704,7 +2701,7 @@ void CUDT::checkTimers()
       if ((m_iEXPCount > 16) && (currtime - m_ullLastRspTime > 5000000 * m_ullCPUFrequency))
       {
          //
-         // Connection is broken. 
+         // Connection is broken.
          // UDT does not signal any information about this instead of to stop quietly.
          // Application will detect this when it calls any UDT methods next time.
          //

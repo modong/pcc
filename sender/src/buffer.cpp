@@ -186,13 +186,11 @@ int CSndBuffer::addBufferFromFile(fstream& ifs, const int& len)
 	if ((len % m_iMSS) != 0)
 		size ++;
 	// dynamically increase sender buffer
-Buffer* startbuffer = bufferEnder;
 	while (size + m_iCount >= m_iSize)
 		increase();
 
 //cout << "TEST " << size << " " << m_iCount << " " << m_iSize << endl;
 
-Block* start = m_pLastBlock;
 	Block* s = m_pLastBlock;
 	int total = 0;
 	for (int i = 0; i < size; ++ i)
@@ -358,7 +356,6 @@ void CSndBuffer::ackData(const int& offset)
 	for (int i = 0; i < offset; ++ i)
 		tmp = tmp->m_pNext;*/
 
-int test = FirstBlock;
 
 	//   for (int i = 0; i < offset; ++ i)
 	//      m_pFirstBlock = m_pFirstBlock->m_pNext;
@@ -428,9 +425,8 @@ void CSndBuffer::increase()
 	nbuf->m_iSize = unitsize;
 	while (bufferEnder->m_pNext != FirstBuffer)
 		bufferEnder = bufferEnder->m_pNext;
-	Buffer* lastBuffer = bufferEnder;
 //	cout << "increase size at " << bufferEnder->first_block->m_iBufferNo << endl;
-	
+
 	Block* prev_first_block;
 	if (m_pFirstBlock->m_iBufferNo) {
 //		cout << "firstblock " << m_pFirstBlock->m_iBufferNo << " " << m_pFirstBlock << endl;
@@ -446,7 +442,7 @@ void CSndBuffer::increase()
 //		cout << "prev " << prev_first_block->m_iBufferNo << " " << prev_first_block << endl;
 		while (prev_first_block->m_pNext != m_pFirstBlock) {
 			prev_first_block = prev_first_block->m_pNext;
-//			cout << prev_first_block->m_iBufferNo << " " << prev_first_block << endl;	
+//			cout << prev_first_block->m_iBufferNo << " " << prev_first_block << endl;
 		}
 	}
 
@@ -479,7 +475,7 @@ cout << "end increase\n";*/
 	Block* pb = nblk, *first_block;
 	int bufferNo = m_pFirstBlock->m_iBufferNo;
 //	cout << "test " << bufferNo << endl;
-
+    first_block = NULL;
 	for (int i = 1; i < unitsize; ++ i)
 	{
 		pb->m_pNext = new Block;

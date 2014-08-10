@@ -9,6 +9,7 @@
 #include <iostream>
 #include <cstring>
 #include <udt.h>
+#include <unistd.h>
 #include "cc.h"
 using namespace std;
 
@@ -58,7 +59,7 @@ int main(int argc, char* argv[])
    UDT::getsockopt(fhandle, 0, UDT_CC, &cchandle, &temp);
    if (NULL != cchandle)
       cchandle->setRate(1);
- 
+
    char file[1024];
    strcpy(file,argv[3]);
    fstream ifs(file, ios::in | ios::binary);
@@ -79,9 +80,8 @@ int main(int argc, char* argv[])
 
    // send the file
    int64_t offset = 0;
-   int64_t sentsize = 0;
 
-   sentsize = UDT::sendfile(fhandle, ifs, offset, size);
+   UDT::sendfile(fhandle, ifs, offset, size);
    UDT::perfmon(fhandle, &trace);
    cout<<"sentsize is "<<trace.pktTotalBytes<<endl;
      sleep(5);

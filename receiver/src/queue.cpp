@@ -564,8 +564,7 @@ void CSndQueue::init(CChannel* c, CTimer* t)
 int CSndQueue::sendto(const sockaddr* addr, CPacket& packet)
 {
    // send out the packet immediately (high priority), this is a control packet
-   int l;
-   l=m_pChannel->sendto(addr, packet);
+   m_pChannel->sendto(addr, packet);
 
    return packet.getLength();
 }
@@ -1074,7 +1073,7 @@ TIMER_CHECK:
 	  #ifdef INCAST
       uint64_t ctime = currtime - 1000 * CTimer::getCPUFrequency();
 	  #else
-      uint64_t ctime = currtime - 10000 * CTimer::getCPUFrequency();	  
+      uint64_t ctime = currtime - 10000 * CTimer::getCPUFrequency();
 	  #endif
       while ((NULL != ul) && (ul->m_llTimeStamp < ctime))
       {
@@ -1160,7 +1159,7 @@ int CRcvQueue::recvfrom(int32_t id, CPacket& packet)
    delete [] newpkt->m_pcData;
    delete newpkt;
 
-   // remove this message from queue, 
+   // remove this message from queue,
    // if no more messages left for this socket, release its data structure
    i->second.pop();
    if (i->second.empty())
@@ -1238,7 +1237,7 @@ CUDT* CRcvQueue::getNewEntry()
 
 void CRcvQueue::storePkt(int32_t id, CPacket* pkt)
 {
-   CGuard bufferlock(m_PassLock);   
+   CGuard bufferlock(m_PassLock);
 
    map<int32_t, std::queue<CPacket*> >::iterator i = m_mBuffer.find(id);
 

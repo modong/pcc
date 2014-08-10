@@ -385,7 +385,7 @@ uint64_t CSndUList::getNextProcTime()
 
 void CSndUList::insert_(const int64_t& ts, const CUDT* u)
 {
-	struct timeval t0,t1;
+	//struct timeval t0,t1;
 
 	CSNode* n = u->m_pSNode;
 
@@ -1016,13 +1016,12 @@ DWORD WINAPI CRcvQueue::worker(LPVOID param)
 	sockaddr* addr = (AF_INET == self->m_UnitQueue.m_iIPversion) ? (sockaddr*) new sockaddr_in : (sockaddr*) new sockaddr_in6;
 	CUDT* u = NULL;
 	int32_t id;
-	int flag =0;
+	//int flag =0;
 	while (!self->m_bClosing)
 	{
 #ifdef NO_BUSY_WAITING
 		self->m_pTimer->tick();
 #endif
-		flag = 0;
 		// check waiting list, if new socket, insert it to the list
 		while (self->ifNewEntry())
 		{
@@ -1081,7 +1080,7 @@ DWORD WINAPI CRcvQueue::worker(LPVOID param)
 						if (0 == unit->m_Packet.getFlag())
 							u->processData(unit);
 						else
-						{u->processCtrl(unit->m_Packet);flag = 1;}
+						{u->processCtrl(unit->m_Packet);}
 
 						u->checkTimers();
 						self->m_pRcvUList->update(u);

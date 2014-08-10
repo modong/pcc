@@ -264,6 +264,9 @@ public:
    virtual void onACK(const int32_t&);
    virtual void onLoss(const int32_t*, const int&);
    virtual void onTimeout();
+   //virtual void onMonitorEnds(int total, int loss, double time, int skip,int num);
+   //virtual void onMonitorStart(int monitor_number);
+
 
 private:
    int m_iRCInterval;			// UDT Rate control interval

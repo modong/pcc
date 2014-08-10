@@ -114,7 +114,7 @@ DWORD WINAPI sendfile(LPVOID usocket)
 
    // aquiring file name information from client
    char file[1024]="/local/file_received";
-   
+
    fstream ofs(file, ios::out | ios::binary | ios::trunc);
 
    // get size information
@@ -130,7 +130,7 @@ DWORD WINAPI sendfile(LPVOID usocket)
       cout << "no such file on the server\n";
    }
    cout<<"size is "<<size<<endl;
-   int64_t recvsize; 
+   int64_t recvsize;
    int64_t offset = 0;
 
    if (UDT::ERROR == (recvsize = UDT::recvfile(fhandle, ofs, offset, size)))
@@ -140,4 +140,5 @@ DWORD WINAPI sendfile(LPVOID usocket)
    cout<<"recv size is"<<recvsize<<endl;
 
    UDT::close(fhandle);
+   return NULL;
 }
