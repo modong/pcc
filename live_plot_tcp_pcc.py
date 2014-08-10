@@ -3,7 +3,7 @@ import matplotlib.animation as animation
 import time
 import os
 
-f, axarr = plt.subplots(2, 1, sharey=True, sharex=True)
+f, axarr = plt.subplots(2, 1, sharey=True, sharex=False)
 
 def animate_tcp(i):
     os.system("scp modong2@sender1.congestion7.uiucscheduling.emulab.net:/local/rate /home/mo/pcc/rate")
@@ -64,9 +64,25 @@ def animate(i):
     ax1.plot(xar, yar)
 
 
+counter = 0
 def animate_together(i):
-    os.system("scp modong2@sender1.demopair1.uiucscheduling.emulab.net:/local/rate* /home/mo/pcc/")
-    os.system("scp modong2@sender1.demopair2.uiucscheduling.emulab.net:/local/rate* /home/mo/pcc/")
+    global counter
+    #os.system("python ftpc.py sender1.demopair1.uiucscheduling.emulab.net 5050")
+    #os.system("python ftpc.py sender1.demopair2.uiucscheduling.emulab.net 5050")
+    counter = counter+1
+    if counter == 5:
+        print "clearing"
+        axarr[1].clear()
+        axarr[0].clear()
+        axarr[1].set_xlabel("Time (s)")
+        axarr[1].set_ylabel("Throughput (Mbit/s)")
+        axarr[1].set_title("TCP's performance")
+        axarr[0].set_xlabel("Time (s)")
+        axarr[0].set_ylabel("Throughput (Mbit/s)")
+        axarr[0].set_title("PCC's performance")
+        counter = 0
+    os.system("scp modong2@sender1.demopair1.uiucscheduling.emulab.net:/local/rate_pcc /home/mo/pcc/")
+    os.system("scp modong2@sender1.demopair2.uiucscheduling.emulab.net:/local/rate_tcp /home/mo/pcc/")
     pullData_tcp = open("rate_tcp", "r")
     for k in range(6):
         pullData_tcp.readline()
@@ -81,11 +97,8 @@ def animate_together(i):
             yar.append(float(y))
     for k in range(len(dataArray_tcp)-1):
         xar.append(k)
-    axarr[1].clear()
-    axarr[1].set_xlabel("Time (s)")
-    axarr[1].set_ylabel("Throughput (Mbit/s)")
-    axarr[1].set_title("TCP's performance")
-    axarr[1].plot(xar, yar)
+    tcp = axarr[1].plot(xar, yar)
+    plt.setp(tcp, color='b')
 
     pullData = open("rate_pcc", "r")
     dataArray = pullData.read().split("\n")
@@ -102,14 +115,16 @@ def animate_together(i):
               x, y = eachLine.split(' ')
               xar.append(float(x))
               yar.append(float(y))
-    axarr[0].clear()
-    axarr[0].set_xlabel("Time (s)")
-    axarr[0].set_ylabel("Throughput (Mbit/s)")
-    axarr[0].set_title("PCC's performance")
-    axarr[0].plot(xar, yar)
+    pcc = axarr[0].plot(xar, yar)
+    plt.setp(pcc, color='b')
+
+axarr[1].clear()
+axarr[1].set_xlabel("Time (s)")
+axarr[1].set_ylabel("Throughput (Mbit/s)")
+axarr[1].set_title("TCP's performance")
+axarr[0].set_xlabel("Time (s)")
+axarr[0].set_ylabel("Throughput (Mbit/s)")
+axarr[0].set_title("PCC's performance")
 
 ani = animation.FuncAnimation(f, animate_together, interval=2000)
-f.set_size_inches(8,6)
-mng = plt.get_current_fig_manager()
 plt.show()
-mng.frame.Maximize(True)
