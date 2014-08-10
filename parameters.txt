@@ -1,0 +1,5 @@
+Bandwidth 100Mbit/s
+RTT 30ms
+BufferSize 300KB
+LossRate 0
+start
