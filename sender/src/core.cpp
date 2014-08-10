@@ -2637,7 +2637,7 @@ m_pSndLossList->insert(const_cast<int32_t&>(m_iSndLastAck), const_cast<int32_t&>
 		else
 		{
 
-                cout<<"CongestReach!"<<cwnd<<endl;
+                //cout<<"CongestReach!"<<cwnd<<endl;
                 ts = entertime +500* m_ullCPUFrequency; // m_ullInterval;
                 m_ullTargetTime = ts;
                 return 0;

@@ -68,7 +68,6 @@ CSndLossList::CSndLossList(const int& size):
 #else
 	m_ListLock = CreateMutex(NULL, false, NULL);
 #endif
-	cout<<"Losslist Size is"<<m_iSize<<endl;
 }
 
 CSndLossList::~CSndLossList()
