@@ -37,9 +37,10 @@ TestPerformance:
 
   1.1 On receiver, go to recever/app run ./appserver 
 
-1.2 On sender goto sender/app run ./appclient receiver's address 9000 2>monitor_log
+  1.2 On sender goto sender/app run ./appclient receiver's address 9000 2>monitor_log
 
 2. File transfer software:
+
   1.1 On receiver, run ./recvfile
  
   1.2 on Sender, run ./sendfile dst_address 9000 file_to_send 2>monitor_log
