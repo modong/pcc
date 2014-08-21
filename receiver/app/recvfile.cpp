@@ -113,7 +113,7 @@ DWORD WINAPI sendfile(LPVOID usocket)
    delete (UDTSOCKET*)usocket;
 
    // aquiring file name information from client
-   char file[1024]="/local/file_received";
+   char file[1024]="./file_received";
 
    fstream ofs(file, ios::out | ios::binary | ios::trunc);
 
