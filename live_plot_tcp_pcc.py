@@ -70,7 +70,7 @@ def animate_together(i):
     #os.system("python ftpc.py sender1.demopair1.uiucscheduling.emulab.net 5050")
     #os.system("python ftpc.py sender1.demopair2.uiucscheduling.emulab.net 5050")
     counter = counter+1
-    if counter == 5:
+    if counter == 1:
         print "clearing"
         axarr[1].clear()
         axarr[0].clear()
@@ -83,6 +83,9 @@ def animate_together(i):
         counter = 0
     os.system("scp modong2@sender1.demopair1.uiucscheduling.emulab.net:/local/rate_pcc /home/mo/pcc/")
     os.system("scp modong2@sender1.demopair2.uiucscheduling.emulab.net:/local/rate_tcp /home/mo/pcc/")
+
+    #os.system("scp modong2@155.98.38.139:/local/rate_pcc /home/mo/pcc/")
+    #os.system("scp modong2@155.98.38.41:/local/rate_tcp /home/mo/pcc/")
     pullData_tcp = open("rate_tcp", "r")
     for k in range(6):
         pullData_tcp.readline()
@@ -99,6 +102,10 @@ def animate_together(i):
         xar.append(k)
     tcp = axarr[1].plot(xar, yar)
     plt.setp(tcp, color='b')
+    avg_tcp = 1.0
+    avg_pcc = 1.0
+    if len(yar)>5:
+        avg_tcp = sum(yar[-5:-1])/4
 
     pullData = open("rate_pcc", "r")
     dataArray = pullData.read().split("\n")
@@ -115,6 +122,22 @@ def animate_together(i):
               x, y = eachLine.split(' ')
               xar.append(float(x))
               yar.append(float(y))
+    if len(yar)>5:
+        avg_pcc = sum(yar[-5:-1])/4
+
+    axarr[0].text(0.9, 1.1, 'improved by {:.2f}X'.format(avg_pcc/avg_tcp),
+           verticalalignment='center', horizontalalignment='center',
+           transform=axarr[0].transAxes,
+           color='red', fontsize=15)
+    axarr[0].text(0.8, 0.9, 'Tpt. {:.2f}Mps'.format(avg_pcc),
+           verticalalignment='center', horizontalalignment='center',
+           transform=axarr[0].transAxes,
+           color='blue', fontsize=15)
+    axarr[1].text(0.8, -0.3, 'Tpt. {:.2f}Mbps'.format(avg_tcp),
+           verticalalignment='center', horizontalalignment='center',
+           transform=axarr[0].transAxes,
+           color='blue', fontsize=15)
+
     pcc = axarr[0].plot(xar, yar)
     plt.setp(pcc, color='b')
 

@@ -34,6 +34,10 @@ class NewSnapshotEventHandler(FileSystemEventHandler):
                 return
             else:
                 self.param = tmp_param
+                if not self.is_start:
+                    os.system("ssh -t -t -o StrictHostKeyChecking=no modong2@receiver1.demopair2.UIUCScheduling.emulab.net \"killall iperf && ./setup.bash {}\"".format(self.param["protocol"]))
+                    os.system("ssh -t -t -o StrictHostKeyChecking=no modong2@receiver1.demopair2.UIUCScheduling.emulab.net \"nohup python ~/run_iperf.py &\"")
+                    os.system("ssh -t -t -o StrictHostKeyChecking=no modong2@sender1.demopair2.UIUCScheduling.emulab.net \"killall iperf && ./setup.bash {}\"".format(self.param["protocol"]))
                 os.system("python ./tune_bw_rtt_loss.py -b {} -d {} -q {} -l {}".format(self.param["Bandwidth"],
                                                                                         self.param["RTT"],
                                                                                         self.param["BufferSize"],

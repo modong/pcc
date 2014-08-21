@@ -11,14 +11,21 @@ HOWTO:
 Setup:
 For sender:
 1. go to ./sender
+
 2. make clean
+
 3. make
+
 4. export LD_LIBRARY_PATH=/path/to/install/sender/src
 
 For receiver:
+
 1. go to ./receiver
+
 2. make clean
+
 3. make
+
 4. export LD_LIBRARY_PATH=/path/to/install/receiver/src
 
 
@@ -27,9 +34,12 @@ NOTE: We recommend do test on FEDORA 10.0 STD system, on which the performance i
 TestPerformance:
 ===
 1. Memory to Memory Data transfer speed test(without using disk): 
+
   1.1 On receiver, go to recever/app run ./appserver 
-  1.3 On sender goto sender/app run ./appclient receiver's address 9000 2>monitor_log
+
+1.2 On sender goto sender/app run ./appclient receiver's address 9000 2>monitor_log
 
 2. File transfer software:
   1.1 On receiver, run ./recvfile
+ 
   1.2 on Sender, run ./sendfile dst_address 9000 file_to_send 2>monitor_log
