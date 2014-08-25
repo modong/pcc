@@ -1,0 +1,8 @@
+ssh -t -t -o StrictHostKeyChecking=no modong2@sender1.demopair3.UIUCScheduling.emulab.net "killall appclient"
+ssh -t -t -o StrictHostKeyChecking=no modong2@sender1.demopair3.UIUCScheduling.emulab.net "rm /local/rate_pcc && touch /local/rate_pcc"
+ssh -t -t -o StrictHostKeyChecking=no modong2@sender2.demopair3.UIUCScheduling.emulab.net "killall appclient"
+ssh -t -t -o StrictHostKeyChecking=no modong2@sender2.demopair3.UIUCScheduling.emulab.net "rm /local/rate_pcc && touch /local/rate_pcc"
+ssh -t -t -o StrictHostKeyChecking=no modong2@sender1.demopair4.UIUCScheduling.emulab.net "killall iperf"
+ssh -t -t -o StrictHostKeyChecking=no modong2@sender1.demopair4.UIUCScheduling.emulab.net "rm /local/rate_tcp && touch /local/rate_tcp"
+ssh -t -t -o StrictHostKeyChecking=no modong2@sender2.demopair4.UIUCScheduling.emulab.net "killall iperf"
+ssh -t -t -o StrictHostKeyChecking=no modong2@sender2.demopair4.UIUCScheduling.emulab.net "rm /local/rate_tcp && touch /local/rate_tcp"
