@@ -84,7 +84,6 @@ int main(int argc, char* argv[])
    UDT::sendfile(fhandle, ifs, offset, size);
    UDT::perfmon(fhandle, &trace);
    cout<<"sentsize is "<<trace.pktTotalBytes<<endl;
-     sleep(5);
    UDT::close(fhandle);
 
    ifs.close();

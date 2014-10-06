@@ -418,27 +418,27 @@ utility /=2;
 
 		if(moving_phase && endMonitor == target_monitor){
 
-                if(current_rate>(t*12/time/1000+10) && current_rate > 200)
-                   {
- //cerr<<current_rate<<" "<<(t*12/time/1000-10)<<endl;
-                current_rate=t*12/time/1000;
-
-
-                make_guess = 1;
-                moving_phase = 0;
-                moving_phase_initial = 0;
-                change_direction=0;
-                change_intense=1;
-                guess_time = 0;
-                continous_guess_count = 0;
-                continous_send = 0;
-                continous_send_count =0;
-                recording_guess_result = 0;
-                recorded_number = 0;
-                setRate(current_rate);
-                cerr<<"trigger"<<endl;
-                return;
-}
+//                if(current_rate>(t*12/time/1000+10) && current_rate > 200)
+//                   {
+// //cerr<<current_rate<<" "<<(t*12/time/1000-10)<<endl;
+//                current_rate=t*12/time/1000;
+//
+//
+//                make_guess = 1;
+//                moving_phase = 0;
+//                moving_phase_initial = 0;
+//                change_direction=0;
+//                change_intense=1;
+//                guess_time = 0;
+//                continous_guess_count = 0;
+//                continous_send = 0;
+//                continous_send_count =0;
+//                recording_guess_result = 0;
+//                recorded_number = 0;
+//                setRate(current_rate);
+//                cerr<<"trigger"<<endl;
+//                return;
+//}
 
                         //cerr<<"moving quickly"<<endl;
 			current_utility = utility;
