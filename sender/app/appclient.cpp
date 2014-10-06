@@ -60,7 +60,6 @@ int main(int argc, char* argv[])
       UDT::setsockopt(client, 0, UDT_MSS, new int(1052), sizeof(int));
    #endif
 
-   cout<<"hei I am here!"<<endl;   // for rendezvous connection, enable the code below
    /*
    UDT::setsockopt(client, 0, UDT_RENDEZVOUS, new bool(true), sizeof(bool));
    if (UDT::ERROR == UDT::bind(client, local->ai_addr, local->ai_addrlen))
@@ -84,7 +83,6 @@ int main(int argc, char* argv[])
       cout << "connect: " << UDT::getlasterror().getErrorMessage() << endl;
       return 0;
    }
-   cout<<"after Initialization"<<endl;
    freeaddrinfo(peer);
 
    // using CC method
@@ -152,7 +150,7 @@ DWORD WINAPI monitor(LPVOID s)
          Sleep(1000);
       #endif
     i++;
-    if(i>100)
+    if(i>10000)
         {
         exit(1); 
         }

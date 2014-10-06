@@ -222,7 +222,7 @@ protected:
 
    char* m_pcParam;			// user defined parameter
    int m_iPSize;			// size of m_pcParam
-
+   volatile int starting_phase;
 private:
    UDTSOCKET m_UDT;                     // The UDT entity that this congestion control algorithm is bound to
 
@@ -264,9 +264,6 @@ public:
    virtual void onACK(const int32_t&);
    virtual void onLoss(const int32_t*, const int&);
    virtual void onTimeout();
-   //virtual void onMonitorEnds(int total, int loss, double time, int skip,int num);
-   //virtual void onMonitorStart(int monitor_number);
-
 
 private:
    int m_iRCInterval;			// UDT Rate control interval

@@ -102,12 +102,12 @@ CUDT::CUDT()
    m_iMSS = 1500;
    m_bSynSending = true;
    m_bSynRecving = true;
-   m_iFlightFlagSize = 20000;
-   m_iSndBufSize = 20000;
-   m_iRcvBufSize = 20000; //Rcv buffer MUST NOT be bigger than Flight Flag size
+   m_iFlightFlagSize = 100000;
+   m_iSndBufSize = 100000;
+   m_iRcvBufSize = 100000; //Rcv buffer MUST NOT be bigger than Flight Flag size
    m_Linger.l_onoff = 1;
    m_Linger.l_linger = 180;
-   m_iUDPSndBufSize = 20000;
+   m_iUDPSndBufSize = 100000;
    m_iUDPRcvBufSize = m_iRcvBufSize * m_iMSS;
    m_iSockType = UDT_STREAM;
    m_iIPversion = AF_INET;

@@ -475,7 +475,8 @@ cout << "end increase\n";*/
 	Block* pb = nblk, *first_block;
 	int bufferNo = m_pFirstBlock->m_iBufferNo;
 //	cout << "test " << bufferNo << endl;
-    first_block = NULL;
+//HACK: This is a temp solution, could it break file transfer?
+//first_block = NULL;
 	for (int i = 1; i < unitsize; ++ i)
 	{
 		pb->m_pNext = new Block;
