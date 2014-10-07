@@ -2998,7 +2998,7 @@ void CUDT::start_monitor(int length)
         time_interval[current_monitor] = m_pCC->m_dPktSndPeriod;
         double rand_factor;
         rand_factor = double(rand()%3)/10;
-	if(m_iRTT*(1.5+rand_factor)/m_pCC->m_dPktSndPeriod>10)
+	if(m_iRTT*(1.1)/m_pCC->m_dPktSndPeriod>10)
 		length=m_iRTT*(1.5+rand_factor)/m_pCC->m_dPktSndPeriod;
 	else
 		length=(10>(5000/m_pCC->m_dPktSndPeriod))?10:(5000/m_pCC->m_dPktSndPeriod);
