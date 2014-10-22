@@ -1,20 +1,29 @@
 #PCC: Re-architecting Congestion Control for High Performance
 
-## What is PCC
-### The end of TCP era
-Comming soon
-
-## How well PCC performs
-Comming soon
-
-## Who should use PCC now
-Comming soon
 
 ## How to use PCC
-Comming soon
 
 ### Installation Guide
-Comming soon
+Setup:
+For sender:
+1. go to ./sender
+
+2. make clean
+
+3. make
+
+4. export LD_LIBRARY_PATH=/path/to/install/sender/src
+
+For receiver:
+
+1. go to ./receiver
+
+2. make clean
+
+3. make
+
+4. export LD_LIBRARY_PATH=/path/to/install/receiver/src
+
 
 ### Evaluate Performance using Emulab
 Comming soon
