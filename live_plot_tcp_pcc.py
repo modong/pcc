@@ -125,6 +125,8 @@ def animate_together(i):
     if len(yar)>5:
         avg_pcc = sum(yar[-5:-1])/4
 
+    if avg_tcp == 0:
+        avg_tcp = 0.00001
     axarr[0].text(0.9, 1.1, 'improved by {:.2f}X'.format(avg_pcc/avg_tcp),
            verticalalignment='center', horizontalalignment='center',
            transform=axarr[0].transAxes,

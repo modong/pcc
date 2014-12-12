@@ -1,6 +1,6 @@
-Bandwidth 100Mbit/s
-RTT 60ms
-BufferSize 150KB
-LossRate 0.02
+Bandwidth 120Mbit/s
+RTT 30ms
+BufferSize 75KB
+LossRate 0.01
 protocol cubic
 stop
