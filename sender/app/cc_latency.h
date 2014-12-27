@@ -105,7 +105,7 @@ public:
 	double rate_array[MAXCOUNT];
 	int array_pointer;
 	int target_monitor;
-	int starting_phase;
+	//int starting_phase;
 	int make_guess;
 	int guess_result;
 	int moving_phase;
@@ -133,7 +133,11 @@ public:
 	int recording_guess_result;
 	int baseline;
 	double utility_baseline;
+        double start_rate_array[100];
+        int start_previous_monitor;
+        double start_previous_utility;
         double previous_rtt;
+
 
 
 
@@ -142,7 +146,7 @@ public:
 
 	{
 		m_dPktSndPeriod = 10000;
-		m_dCWndSize = 20000.0;
+		m_dCWndSize = 100000.0;
 		setRTO(100000000);
 		starting_phase=1;
 		target_monitor = 0;
@@ -163,6 +167,10 @@ public:
 		recorded_number = 0;
 		baseline = 0;
 		utility_baseline = 0;
+                for(int i=0;i<100;i++)
+                  start_rate_array[i] = 0;
+                start_previous_monitor = -1;
+                start_previous_utility = -10000;
                 previous_rtt = 0;
 
 
@@ -190,6 +198,13 @@ public:
 
 	virtual void onMonitorStart(int current_monitor){
 
+                if(starting_phase){
+                start_rate_array[current_monitor] = previous_rate*2;
+                cerr<<"double rate to "<<start_rate_array[current_monitor]<<endl;
+                previous_rate = start_rate_array[current_monitor];
+                setRate(start_rate_array[current_monitor]);
+                return;
+                } 
 		if(make_guess == 1){
                    //cerr<<"make guess!"<<continous_guess_count<<endl;
 			if(guess_time == 0 && continous_guess_count == MAX_COUNTINOUS_GUESS)
@@ -213,6 +228,7 @@ public:
 					}
 
 				}
+
 				setRate(rate_bucket[guess_time]);
                                 //cerr<<"setrate as "<<rate_bucket[guess_time]<<endl;
 				guess_time++;
@@ -254,44 +270,81 @@ public:
 		if(l<0)
 			l=0;
 //utility = ((t-l)/time-20*l/time);
-if(previous_rtt == 0)
+if(previous_rtt==0)
 previous_rtt = m_iRTT;
+utility = ((t-l)/time*(1-1/(1+exp(-100*(l/t-0.05))))* (1-1/(1+exp(-100*(1-previous_rtt/m_iRTT)))) -1*l/time)/m_iRTT*1000;
+previous_rtt = m_iRTT;
+if(endMonitor == 0 && starting_phase)
+utility /=2;
+		cerr<<current_rate<<'\t'<<(t-l)*12/time/1000<<'\t'<<t<<'\t'<<l<<'\t'<<time<<"\t"<<utility<<"\t"<<m_iRTT<<endl;
 
-utility = ((t-l)/time*(1-1/(1+exp(-100*(l/t-0.05))))-1*l/time);
-//utility = ((t-l)/time*(1-1/(1+exp(-100*(l/t-0.05))))-1*l/time);
-		cerr<<t*12/time/1000<<'\t'<<(t-l)*12/time/1000<<'\t'<<t<<'\t'<<l<<'\t'<<time<<"\t"<<utility<<"\t"<<m_iRTT<<endl;
 //		utility = (t-l)/time*(1-l/t)*(1-l/t)*(1-l/t)*(1-l/t)*(1-l/t);(m_iRTT/1000);(m_iRTT/1000);
-previous_rtt = m_iRTT;
+                cerr<<"end number"<<endMonitor<<endl;
 		if(starting_phase){
-			if(endMonitor >= target_monitor){
-				target_monitor = (current+1)%100;
-				current_utility = utility;
-
-				if(current_utility>=previous_utility){
-					previous_rate = current_rate;
-					current_rate = current_rate*2;
-					setRate(current_rate);
-					previous_utility = current_utility;
-					return;
-				} else if(current_utility<previous_utility){
-					starting_phase=0;
-					setRate(previous_rate);
-					//TODO: this part is kind of foggy
-					previous_utility=utility;
-					current_rate = previous_rate;
-					make_guess=1;
-					return;
-				}
-			}
+                        if(endMonitor - 1 > start_previous_monitor){
+                             if(start_previous_monitor == -1){
+                               cerr<<"catch you!"<<endl;
+                             starting_phase = 0;
+                             make_guess = 1;
+                             setRate(start_rate_array[0]);
+                             current_rate = start_rate_array[0];
+                             return;
+                             }else{
+                             cerr<<"exit because of loss"<<endl;
+                             cerr<<"in monitor"<<start_previous_monitor<<endl;
+                             cerr<<"fall back to due to loss"<<start_rate_array[start_previous_monitor]<<endl;
+                             starting_phase = 0;
+                             make_guess = 1;
+                             setRate(start_rate_array[start_previous_monitor]);
+                             current_rate = start_rate_array[start_previous_monitor];                             
+                             return;}
+                        }
+                        if (start_previous_utility < utility){
+                            cerr<<"moving forward"<<endl;
+                            // do nothing
+                            start_previous_utility = utility;
+                            start_previous_monitor = endMonitor;
+                            return;
+                        } else{
+                             starting_phase = 0;
+                             make_guess = 1;
+                             setRate(start_rate_array[start_previous_monitor]);
+                             current_rate = start_rate_array[start_previous_monitor];
+                             cerr<<"fall back to "<<start_rate_array[start_previous_monitor]<<endl;
+                             previous_rate = current_rate;
+                             return;
+                        }
+                        
 		}
 
 		if(recording_guess_result){
+/*                if(current_rate>(t*12/time/1000+10) && current_rate > 200)
+                   {
+                current_rate=t*12/time/1000;
+
+                make_guess = 1;
+                moving_phase = 0;
+                moving_phase_initial = 0;
+                change_direction=0;
+                change_intense=1;
+                guess_time = 0;
+                continous_guess_count = 0;
+                continous_send = 0;
+                continous_send_count =0;
+                recording_guess_result = 0;
+                recorded_number = 0;
+                setRate(current_rate);
+                cerr<<"trigger"<<endl;
+                return;
+}*/
 
 			for(int i = 0; i<NUMBER_OF_PROBE; i++){
 				if(endMonitor == monitor_bucket[i]){
+
 					recorded_number++;
 					utility_bucket[i]=utility;
 				}
+}
 				//TODO to let the sender go back to the current sending rate, one way is to
 				//let the decision maker stop for another monitor period,which might not be a good option, let's try this first
 				if(recorded_number == NUMBER_OF_PROBE){
@@ -330,12 +383,32 @@ previous_rtt = m_iRTT;
                                                 setRate(current_rate);
 					}
 				}
-			}
+			
 
 
 		}
 
 		if(moving_phase_initial && endMonitor == target_monitor){
+                if(current_rate>(t*12/time/1000+10) && current_rate > 200)
+                   {
+                current_rate=t*12/time/1000;
+
+                make_guess = 1;
+                moving_phase = 0;
+                moving_phase_initial = 0;
+                change_direction=0;
+                change_intense=1;
+                guess_time = 0;
+                continous_guess_count = 0;
+                continous_send = 0;
+                continous_send_count =0;
+                recording_guess_result = 0;
+                recorded_number = 0;
+                setRate(current_rate);
+                cerr<<"trigger"<<endl;
+                return;
+}
+
 //cerr<<"moving initial"<<endl;
 			target_monitor = (current+1)%MAX_MONITOR_NUMBER;
 			previous_rate = current_rate;
@@ -350,6 +423,29 @@ previous_rtt = m_iRTT;
 		}
 
 		if(moving_phase && endMonitor == target_monitor){
+
+                if(current_rate>(t*12/time/1000+10) && current_rate > 200)
+                   {
+ //cerr<<current_rate<<" "<<(t*12/time/1000-10)<<endl;
+                current_rate=t*12/time/1000;
+
+
+                make_guess = 1;
+                moving_phase = 0;
+                moving_phase_initial = 0;
+                change_direction=0;
+                change_intense=1;
+                guess_time = 0;
+                continous_guess_count = 0;
+                continous_send = 0;
+                continous_send_count =0;
+                recording_guess_result = 0;
+                recorded_number = 0;
+                setRate(current_rate);
+                cerr<<"trigger"<<endl;
+                return;
+}
+
                         //cerr<<"moving quickly"<<endl;
 			current_utility = utility;
 			if(current_utility>previous_utility){
