@@ -136,6 +136,7 @@ public:
         double start_rate_array[100];
         int start_previous_monitor;
         double start_previous_utility;
+        double previous_rtt;
 
 
 
@@ -170,6 +171,7 @@ public:
                   start_rate_array[i] = 0;
                 start_previous_monitor = -1;
                 start_previous_utility = -10000;
+                previous_rtt = 0;
 
 
 	}
@@ -202,7 +204,7 @@ public:
                 previous_rate = start_rate_array[current_monitor];
                 setRate(start_rate_array[current_monitor]);
                 return;
-                } 
+                }
 		if(make_guess == 1){
                    //cerr<<"make guess!"<<continous_guess_count<<endl;
 			if(guess_time == 0 && continous_guess_count == MAX_COUNTINOUS_GUESS)
@@ -226,6 +228,7 @@ public:
 					}
 
 				}
+
 				setRate(rate_bucket[guess_time]);
                                 //cerr<<"setrate as "<<rate_bucket[guess_time]<<endl;
 				guess_time++;
@@ -263,17 +266,21 @@ public:
 		double utility;
 		double t=total;
 		double l=loss;
+		int random_direciton;
 		if(l<0)
 			l=0;
 //utility = ((t-l)/time-20*l/time);
-
-utility = ((t-l)/time*(1-1/(1+exp(-100*(l/t-0.05))))-1*l/time);
+if(previous_rtt==0)
+previous_rtt = m_iRTT;
+//utility = ((t-l)/time*(1-1/(1+exp(-100*(l/t-0.05))))-1*l/time);
+utility = ((t-l)/time*(1-1/(1+exp(-100*(l/t-0.05))))* (1-1/(1+exp(-10*(1-previous_rtt/m_iRTT)))) -1*l/time)/m_iRTT*1000;
+previous_rtt = m_iRTT;
 if(endMonitor == 0 && starting_phase)
 utility /=2;
-		cerr<<current_rate<<'\t'<<(t-l)*12/time/1000<<'\t'<<t<<'\t'<<l<<'\t'<<time<<"\t"<<utility<<"\t"<<current_rate<<endl;
+		cerr<<current_rate<<'\t'<<(t-l)*12/time/1000<<'\t'<<t<<'\t'<<l<<'\t'<<time<<"\t"<<utility<<"\t"<<m_iRTT<<endl;
 
 //		utility = (t-l)/time*(1-l/t)*(1-l/t)*(1-l/t)*(1-l/t)*(1-l/t);(m_iRTT/1000);(m_iRTT/1000);
-
+                cerr<<"end number"<<endMonitor<<endl;
 		if(starting_phase){
                         if(endMonitor - 1 > start_previous_monitor){
                              if(start_previous_monitor == -1){
@@ -290,7 +297,7 @@ utility /=2;
                              starting_phase = 0;
                              make_guess = 1;
                              setRate(start_rate_array[start_previous_monitor]);
-                             current_rate = start_rate_array[start_previous_monitor];                             
+                             current_rate = start_rate_array[start_previous_monitor];
                              return;}
                         }
                         if (start_previous_utility < utility){
@@ -308,7 +315,7 @@ utility /=2;
                              previous_rate = current_rate;
                              return;
                         }
-                        
+
 		}
 
 		if(recording_guess_result){
@@ -383,7 +390,7 @@ utility /=2;
 		}
 
 		if(moving_phase_initial && endMonitor == target_monitor){
- /*               if(current_rate>(t*12/time/1000+10) && current_rate > 200)
+                if(current_rate>(t*12/time/1000+10) && current_rate > 200)
                    {
                 current_rate=t*12/time/1000;
 
@@ -401,7 +408,7 @@ utility /=2;
                 setRate(current_rate);
                 cerr<<"trigger"<<endl;
                 return;
-}*/
+}
 
 //cerr<<"moving initial"<<endl;
 			target_monitor = (current+1)%MAX_MONITOR_NUMBER;
@@ -418,27 +425,27 @@ utility /=2;
 
 		if(moving_phase && endMonitor == target_monitor){
 
-//                if(current_rate>(t*12/time/1000+10) && current_rate > 200)
-//                   {
-// //cerr<<current_rate<<" "<<(t*12/time/1000-10)<<endl;
-//                current_rate=t*12/time/1000;
-//
-//
-//                make_guess = 1;
-//                moving_phase = 0;
-//                moving_phase_initial = 0;
-//                change_direction=0;
-//                change_intense=1;
-//                guess_time = 0;
-//                continous_guess_count = 0;
-//                continous_send = 0;
-//                continous_send_count =0;
-//                recording_guess_result = 0;
-//                recorded_number = 0;
-//                setRate(current_rate);
-//                cerr<<"trigger"<<endl;
-//                return;
-//}
+                if(current_rate>(t*12/time/1000+10) && current_rate > 200)
+                   {
+ //cerr<<current_rate<<" "<<(t*12/time/1000-10)<<endl;
+                current_rate=t*12/time/1000;
+
+
+                make_guess = 1;
+                moving_phase = 0;
+                moving_phase_initial = 0;
+                change_direction=0;
+                change_intense=1;
+                guess_time = 0;
+                continous_guess_count = 0;
+                continous_send = 0;
+                continous_send_count =0;
+                recording_guess_result = 0;
+                recorded_number = 0;
+                setRate(current_rate);
+                cerr<<"trigger"<<endl;
+                return;
+}
 
                         //cerr<<"moving quickly"<<endl;
 			current_utility = utility;
