@@ -11,8 +11,8 @@
 #define MAX_COUNTINOUS_GUESS 5
 #define MAX_COUNTINOUS_SEND 1
 #define MAX_MONITOR_NUMBER 100
-#define DEBUG
-
+//#define DEBUGCC
+//#define UTILITY_TRACE
 using namespace std;
 class CTCP: public CCC
 {
@@ -201,15 +201,21 @@ public:
 
                 if(starting_phase){
                 start_rate_array[current_monitor] = previous_rate*2;
+#ifdef DEBUGCC
                 cerr<<"double rate to "<<start_rate_array[current_monitor]<<endl;
+#endif
                 previous_rate = start_rate_array[current_monitor];
                 setRate(start_rate_array[current_monitor]);
                 return;
                 }
 		if(make_guess == 1){
-                   //cerr<<"make guess!"<<continous_guess_count<<endl;
+#ifdef DEBUGCC
+                   cerr<<"make guess!"<<continous_guess_count<<endl;
+#endif
 			if(guess_time == 0 && continous_guess_count == MAX_COUNTINOUS_GUESS)
-                   //cerr<<"skip guess"<<endl;
+#ifdef DEBUGCC
+                   cerr<<"skip guess"<<endl;
+#endif
 				continous_guess_count =0;
 				if(guess_time == 0){
 					recording_guess_result = 1;
@@ -221,38 +227,52 @@ public:
 						rand_dir = (rand()%2*2-1);
 						rate_bucket[i] = current_rate + rand_dir*continous_guess_count*GRANULARITY*current_rate;
 						rate_bucket[++i] = current_rate - rand_dir*continous_guess_count*GRANULARITY*current_rate;
-                                               //cerr<<"guess rate"<<rate_bucket[i-1]<<" "<<rate_bucket[i]<<endl;
+#ifdef DEBUGCC
+                       cerr<<"guess rate"<<rate_bucket[i-1]<<" "<<rate_bucket[i]<<endl;
+#endif
 					}
 					for(int i = 0; i < NUMBER_OF_PROBE; i++){
 						monitor_bucket[i] = (current_monitor + i) % MAX_MONITOR_NUMBER;
-                                             //cerr<<"guess monitor"<<monitor_bucket[i]<<endl;
+#ifdef DEBUGCC
+                                             cerr<<"guess monitor"<<monitor_bucket[i]<<endl;
+#endif
 					}
 
 				}
 
 				setRate(rate_bucket[guess_time]);
-                                //cerr<<"setrate as "<<rate_bucket[guess_time]<<endl;
+#ifdef DEBUGCC
+                cerr<<"setrate as "<<rate_bucket[guess_time]<<endl;
+#endif
 				guess_time++;
 				//TODO:Here the sender stopped at a particular rate
 				if(guess_time == NUMBER_OF_PROBE){
-                                      //cerr<<"Guess exit!"<<endl;
+#ifdef DEBUGCC
+cerr<<"Guess exit!"<<endl;
+#endif
 					make_guess = 0;
 					guess_time = 0;
 
 				}
 		}
 			if(continous_send ==  1){
-                                //cerr<<"CONTINOUS send"<<endl;
+#ifdef DEBUGCC
+                                cerr<<"CONTINOUS send"<<endl;
+#endif
                                 if(continous_send_count == 1){
                                         setRate(current_rate);
 
                                 }
 				if(continous_send_count < MAX_COUNTINOUS_SEND){
 					continous_send_count++;
-                                        //cerr<<"continous send"<<endl;
+#ifdef DEBUGCC
+                                        cerr<<"continous send"<<endl;
+#endif
 
 				}else{
-//cerr<<"clear continous send"<<endl;
+#ifdef DEBUGCC
+cerr<<"clear continous send"<<endl;
+#endif
 					continous_send = 0;
                                         continous_send_count = 0;
                                         continous_guess_count = 0;
@@ -278,23 +298,31 @@ utility = ((t-l)/time*(1-1/(1+exp(-1000*(l/t-0.05))))* (1-1/(1+exp(-80*(1-previo
 previous_rtt = m_iRTT;
 if(endMonitor == 0 && starting_phase)
 utility /=2;
+#ifdef UTILITY_TRACE
 		cerr<<current_rate<<'\t'<<(t-l)*12/time/1000<<'\t'<<t<<'\t'<<l<<'\t'<<time<<"\t"<<utility<<"\t"<<m_iRTT<<endl;
+#endif
 
 //		utility = (t-l)/time*(1-l/t)*(1-l/t)*(1-l/t)*(1-l/t)*(1-l/t);(m_iRTT/1000);(m_iRTT/1000);
+#ifdef DEBUGCC
                 cerr<<"end number"<<endMonitor<<endl;
+#endif
 		if(starting_phase){
                         if(endMonitor - 1 > start_previous_monitor){
                              if(start_previous_monitor == -1){
-                               cerr<<"catch you!"<<endl;
+#ifdef DEBUGCC
+                               cerr<<"fall back to guess mode"<<endl;
+#endif
                              starting_phase = 0;
                              make_guess = 1;
                              setRate(start_rate_array[0]);
                              current_rate = start_rate_array[0];
                              return;
                              }else{
+#ifdef DEBUGCC
                              cerr<<"exit because of loss"<<endl;
                              cerr<<"in monitor"<<start_previous_monitor<<endl;
                              cerr<<"fall back to due to loss"<<start_rate_array[start_previous_monitor]<<endl;
+#endif
                              starting_phase = 0;
                              make_guess = 1;
                              setRate(start_rate_array[start_previous_monitor]);
@@ -302,7 +330,9 @@ utility /=2;
                              return;}
                         }
                         if (start_previous_utility < utility){
+#ifdef DEBUGCC
                             cerr<<"moving forward"<<endl;
+#endif
                             // do nothing
                             start_previous_utility = utility;
                             start_previous_monitor = endMonitor;
@@ -312,7 +342,9 @@ utility /=2;
                              make_guess = 1;
                              setRate(start_rate_array[start_previous_monitor]);
                              current_rate = start_rate_array[start_previous_monitor];
+#ifdef DEBUGCC
                              cerr<<"fall back to "<<start_rate_array[start_previous_monitor]<<endl;
+#endif
                              previous_rate = current_rate;
                              return;
                         }
@@ -366,10 +398,14 @@ utility /=2;
 					if(decision == 0){
 						make_guess = 1;
 						recording_guess_result = 0;
-                                               //cerr<<"no decision"<<endl;
+#ifdef DEBUGCC
+                        cerr<<"no decision"<<endl;
+#endif
 					}else{
 						change_direction = decision>0?1:-1;
-                                                //cerr<<"change to the direction of"<<change_direction<<endl;
+#ifdef DEBUGCC
+                        cerr<<"change to the direction of"<<change_direction<<endl;
+#endif
 						recording_guess_result = 0;
 						target_monitor = (current+1)%MAX_MONITOR_NUMBER;
 						moving_phase_initial = 1;
@@ -407,11 +443,15 @@ utility /=2;
                 recording_guess_result = 0;
                 recorded_number = 0;
                 setRate(current_rate);
-                cerr<<"trigger"<<endl;
+#ifdef DEBUGCC
+                cerr<<"system udp call speed limiting, resyncing rate"<<endl;
+#endif
                 return;
 }
 
-//cerr<<"moving initial"<<endl;
+#ifdef DEBUGCC
+cerr<<"first time moving"<<endl;
+#endif
 			target_monitor = (current+1)%MAX_MONITOR_NUMBER;
 			previous_rate = current_rate;
 			previous_utility = utility;
@@ -428,7 +468,6 @@ utility /=2;
 
                 if(current_rate>(t*12/time/1000+10) && current_rate > 200)
                    {
- //cerr<<current_rate<<" "<<(t*12/time/1000-10)<<endl;
                 current_rate=t*12/time/1000;
 
 
@@ -444,11 +483,15 @@ utility /=2;
                 recording_guess_result = 0;
                 recorded_number = 0;
                 setRate(current_rate);
-                cerr<<"trigger"<<endl;
+#ifdef DEBUGCC
+                cerr<<"system udp call speed limiting, resyncing rate"<<endl;
+#endif
                 return;
 }
 
-                        //cerr<<"moving quickly"<<endl;
+#ifdef DEBUGCC
+                        cerr<<"moving faster"<<endl;
+#endif
 			current_utility = utility;
 			if(current_utility>previous_utility){
 				target_monitor = (current+1)%MAX_MONITOR_NUMBER;
