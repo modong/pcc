@@ -95,6 +95,7 @@ written by
 
 //#define NO_BUSY_WAITING
 
+//#define DEBUG
 #define EXPERIMENTAL_FEATURE_CONTINOUS_SEND 
 //#define INCAST 
 #ifdef WIN32

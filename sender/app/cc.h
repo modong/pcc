@@ -11,6 +11,7 @@
 #define MAX_COUNTINOUS_GUESS 5
 #define MAX_COUNTINOUS_SEND 1
 #define MAX_MONITOR_NUMBER 100
+#define DEBUG
 
 using namespace std;
 class CTCP: public CCC
