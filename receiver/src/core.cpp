@@ -1520,7 +1520,7 @@ int64_t CUDT::recvfile(fstream& ofs, int64_t& offset, int64_t size, int block)
    int64_t torecv = size;
    int unitsize = block;
    int recvsize;
-   int percent;
+   int percent = 0;
 
    // positioning...
    try
