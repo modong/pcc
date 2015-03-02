@@ -180,8 +180,8 @@ DWORD WINAPI monitor(LPVOID s)
          break;
       }
 
-      cout << perf.pktRecvTotal << "\t\t"
-           << perf.pktRecvNAKTotal << endl;
+      //cout << perf.pktRecvTotal << "\t\t"
+      //     << perf.pktRecvNAKTotal << endl;
    }
 
    #ifndef WIN32

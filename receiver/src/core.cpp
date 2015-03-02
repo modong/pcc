@@ -1758,7 +1758,7 @@ void CUDT::sendCtrl(int pkttype, void* lparam, void* rparam, int size)
      //      the info about receiver buffer, but I guess that can be mitigated by controlling at sender's side somehow
       if (ack == m_iRcvLastAckAck)
       {
-            cout<<"come in"<<endl;
+            //cout<<"come in"<<endl;
             pthread_mutex_lock(&m_RecvDataLock);
             if (m_bSynRecving)
                pthread_cond_signal(&m_RecvDataCond);
