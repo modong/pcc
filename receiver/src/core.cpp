@@ -1520,6 +1520,7 @@ int64_t CUDT::recvfile(fstream& ofs, int64_t& offset, int64_t size, int block)
    int64_t torecv = size;
    int unitsize = block;
    int recvsize;
+   int percent = 0;
 
    // positioning...
    try
@@ -1563,13 +1564,17 @@ int64_t CUDT::recvfile(fstream& ofs, int64_t& offset, int64_t size, int block)
       recvsize = m_pRcvBuffer->readBufferToFile(ofs, unitsize);
 
       if (recvsize > 0)
-      {  cout<<"receiving "<<torecv<<endl;
+      {   if(100-100*torecv/size > percent)
+          {
+              percent = 100-100*torecv/size;
+              cout<<'\r'<<"receiving "<<percent<<"%"<<flush;
+          }
          torecv -= recvsize;
        //  cout<<"in buffer"<<m_pRcvBuffer->getRcvDataSize()<<endl;
          offset += recvsize;
       }
    }
-   cout<<"exit!"<<endl;
+   cout<<"\nFinished receiving"<<endl;
    if (m_pRcvBuffer->getRcvDataSize() <= 0)
    {
       // read is not available any more
@@ -1758,7 +1763,7 @@ void CUDT::sendCtrl(int pkttype, void* lparam, void* rparam, int size)
      //      the info about receiver buffer, but I guess that can be mitigated by controlling at sender's side somehow
       if (ack == m_iRcvLastAckAck)
       {
-            cout<<"come in"<<endl;
+            //cout<<"come in"<<endl;
             pthread_mutex_lock(&m_RecvDataLock);
             if (m_bSynRecving)
                pthread_cond_signal(&m_RecvDataCond);
@@ -2468,11 +2473,13 @@ int CUDT::processData(CUnit* unit)
    if ((offset < 0) || (offset >= m_pRcvBuffer->getAvailBufSize()))
       {
 
+#ifdef DEBUGCORE
         if(offset >= m_pRcvBuffer->getAvailBufSize())
            cout<<"overflow"<<endl;
         cout<<offset<<endl;
         cout<<"invalid data\n";
         cout<<m_pRcvBuffer->getAvailBufSize()<<endl;
+#endif
         return -1;
       }
 
