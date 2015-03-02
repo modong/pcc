@@ -1520,6 +1520,7 @@ int64_t CUDT::recvfile(fstream& ofs, int64_t& offset, int64_t size, int block)
    int64_t torecv = size;
    int unitsize = block;
    int recvsize;
+   int percent;
 
    // positioning...
    try
@@ -1563,13 +1564,17 @@ int64_t CUDT::recvfile(fstream& ofs, int64_t& offset, int64_t size, int block)
       recvsize = m_pRcvBuffer->readBufferToFile(ofs, unitsize);
 
       if (recvsize > 0)
-      {  cout<<"receiving "<<torecv<<endl;
+      {   if(100-100*torecv/size > percent)
+          {
+              percent = 100-100*torecv/size;
+              cout<<'\r'<<"receiving "<<percent<<"%"<<flush;
+          }
          torecv -= recvsize;
        //  cout<<"in buffer"<<m_pRcvBuffer->getRcvDataSize()<<endl;
          offset += recvsize;
       }
    }
-   cout<<"exit!"<<endl;
+   cout<<"\nFinished receiving"<<endl;
    if (m_pRcvBuffer->getRcvDataSize() <= 0)
    {
       // read is not available any more
@@ -2468,11 +2473,13 @@ int CUDT::processData(CUnit* unit)
    if ((offset < 0) || (offset >= m_pRcvBuffer->getAvailBufSize()))
       {
 
+#ifdef DEBUGCORE
         if(offset >= m_pRcvBuffer->getAvailBufSize())
            cout<<"overflow"<<endl;
         cout<<offset<<endl;
         cout<<"invalid data\n";
         cout<<m_pRcvBuffer->getAvailBufSize()<<endl;
+#endif
         return -1;
       }
 

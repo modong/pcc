@@ -1513,7 +1513,7 @@ int64_t CUDT::sendfile(fstream& ifs, int64_t& offset, const int64_t& size, const
 			tosend -= sentsize;
 			offset += sentsize;
 		}
-                cout<<tosend<<endl;
+                //cout<<tosend<<endl;
 		// insert this socket to snd list if it is not on the list yet
 		m_pSndQueue->m_pSndUList->update(this, false);
 
