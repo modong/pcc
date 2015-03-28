@@ -290,23 +290,20 @@ private:
    
    
 private: // monitor
-   int current_monitor, previous_monitor, monitor_ttl;
-//   int start_seq[100], start_retransmission[100], end_seq[100], end_retransmission[100];
+   bool monitor;  
+
+   int test; // remove?
+   int current_monitor, previous_monitor, monitor_ttl, left_monitor; // what is left_monitor?
    double start_time[100], end_time[100], end_transmission_time[100];
    // for state, 1=sending, 2= waiting, 3=finished
-   int lost[100], retransmission[100], total[100], new_transmission[100], left[100], state[100], left_monitor;//, end_pkt[100];
-   int32_t pkt_sending[100][8000];
+   int lost[100], retransmission[100], total[100], new_transmission[100], left[100], state[100];
    int32_t latency[100];
-   vector<int32_t> loss_record1, loss_record2;
-   vector<int32_t>::iterator itr_loss_record1, itr_loss_record2;
    int32_t latency_seq_start[100], latency_seq_end[100];
    int32_t latency_time_start[100], latency_time_end[100];
    int32_t time_interval[100];
-   int lossptr;
-   bool recv_ack[100][30000];
-   bool monitor;  
-   int test;
-//   int retransmission_list[60000], max_retransmission_list, min_retransmission_list_seqNo; 
+   vector<int32_t> loss_record1, loss_record2;
+   vector<int32_t>::iterator itr_loss_record1, itr_loss_record2;
+
 
 private:
    static CUDTUnited s_UDTUnited;               // UDT global management base
