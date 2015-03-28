@@ -2358,6 +2358,7 @@ void CUDT::processCtrl(CPacket& ctrlpkt)
 		int32_t* tsn_payload = (int32_t *)(ctrlpkt.m_pcData);
 		int last_position = (int)(ctrlpkt.getLength() / 4)-1;
 		int Mon = tsn_payload[last_position]>>16;
+		// remove?
 		if(latency_time_start[Mon] == 0){
 			latency_time_start[Mon]=ctrlpkt.m_iTimeStamp;
 			latency_seq_start[Mon] = tsn_payload[last_position] & 0xFFFF;
@@ -2380,7 +2381,6 @@ void CUDT::processCtrl(CPacket& ctrlpkt)
 
 				// find out the monitor which didn't end
 				int tmp = (monitorNo+99)%100;
-				int count=0;
 				while (tmp!=current_monitor) {
 					if (state[tmp]==2) {
 						//cerr<<"TEST "<<current_monitor<<" "<<state[tmp]<<endl;
@@ -2399,14 +2399,14 @@ void CUDT::processCtrl(CPacket& ctrlpkt)
 						m_ullInterval = (uint64_t)(m_pCC->m_dPktSndPeriod * m_ullCPUFrequency);
 						if (!left_monitor) break;
 					}
-					tmp = (tmp+99)%100;
+					tmp = (tmp+99)%100;//?
 				}
 			}
 		}
 		//cout<<()<<' '<<()<<endl;
 		//cout<<tmp<<endl;
-		// update CC parameters
-		//   m_dCongestionWindow = m_pCC->m_dCWndSize;
+		//update CC parameters
+		//m_dCongestionWindow = m_pCC->m_dCWndSize;
 
 		break;
 	}
@@ -2497,6 +2497,7 @@ int CUDT::packData(CPacket& packet, uint64_t& ts)
 			// what happen here?
 			if (0 != (payload = m_pSndBuffer->readData(&(packet.m_pcData), packet.m_iMsgNo)))
 			{
+				// is this neecssary?
 				if (monitor_ttl==0)
 					start_monitor(100000);
 				m_iSndCurrSeqNo = CSeqNo::incseq(m_iSndCurrSeqNo);
@@ -2540,38 +2541,27 @@ int CUDT::packData(CPacket& packet, uint64_t& ts)
 //third step: pack a data and send out in this step
 //fourth step: do the timing control right, don't let packData wait for a very long time
 				//int msglen;
-				if(!loss_record1.empty()){
-					if(loss_record2.back()+1 < m_iSndCurrSeqNo){
-					 // m_pSndLossList->insert(const_cast<int32_t&>(m_iSndLastAck), const_cast<int32_t&>(m_iSndCurrSeqNo));
+				if(!loss_record1.empty())
+				{
+					if(loss_record2.back()+1 < m_iSndCurrSeqNo)
+					{
 						m_pSndLossList->insert(loss_record2.back()+2, const_cast<int32_t&>(m_iSndCurrSeqNo));
 						int32_t payload[1];
 						payload[0]=1;
 						sendCtrl(32767, NULL, payload, 1*4);
-//cout<<loss_record2.back()+2<<" "<<m_iSndCurrSeqNo<<endl;
-											   // cout<<"this should not happend2"<<endl;
-					}else{
-	  //                                          m_pSndLossList->insert(*loss_record1.begin(), *loss_record2.begin());
+						//cout<<loss_record2.back()+2<<" "<<m_iSndCurrSeqNo<<endl;
+						// cout<<"this should not happend2"<<endl;
+					}else
+					{
+	                    // m_pSndLossList->insert(*loss_record1.begin(), *loss_record2.begin());
 					}
 					pthread_mutex_unlock(&m_LossrecordLock);
-
-
 				}
 				else{
 					m_pSndLossList->insert(const_cast<int32_t&>(m_iSndCurrSeqNo), const_cast<int32_t&>(m_iSndCurrSeqNo));
-//                                      cout<<"inserting tail2 "<<m_pSndLossList->getLostSeq()<<endl;
+                    // cout<<"inserting tail2 "<<m_pSndLossList->getLostSeq()<<endl;
 				}
-/*		if (m_ullTimeDiff >= m_ullInterval)
-		{
-			ts = entertime;
-			m_ullTimeDiff -= m_ullInterval;
-						cout<<"Hurry!"<<m_ullTimeDiff<<" "<<m_ullInterval<<endl;
-		}
-		else
-		{
-			ts = entertime + m_ullInterval - m_ullTimeDiff;
-			m_ullTimeDiff = 0;
-		}
-*/
+
 				ts = entertime +500* m_ullCPUFrequency; // m_ullInterval;
 				m_ullTargetTime = ts;
 				return 0;
@@ -2579,11 +2569,6 @@ int CUDT::packData(CPacket& packet, uint64_t& ts)
 				ts = entertime +500* m_ullCPUFrequency; // m_ullInterval;
 				m_ullTargetTime = ts;
 				return 0;
-
-/*				m_ullTargetTime = 0;
-				m_ullTimeDiff = 0;
-				ts = 0;
-				return 0;*/
 #endif
 			}
 			gettimeofday(&end,NULL);
@@ -2634,99 +2619,100 @@ int CUDT::packData(CPacket& packet, uint64_t& ts)
 		TotalBytes+=payload;
 		return payload;
 	}
+}
 
-	int CUDT::processData(CUnit* unit)
-	{
-		CPacket& packet = unit->m_Packet;
+int CUDT::processData(CUnit* unit)
+{
+	CPacket& packet = unit->m_Packet;
 
 	// Just heard from the peer, reset the expiration count.
-		m_iEXPCount = 1;
-		uint64_t currtime;
-		CTimer::rdtsc(currtime);
-		m_ullLastRspTime = currtime;
+	m_iEXPCount = 1;
+	uint64_t currtime;
+	CTimer::rdtsc(currtime);
+	m_ullLastRspTime = currtime;
 
-		m_pCC->onPktReceived(&packet);
-		++ m_iPktCount;
+	m_pCC->onPktReceived(&packet);
+	++ m_iPktCount;
 	// update time information
-		m_pRcvTimeWindow->onPktArrival();
+	m_pRcvTimeWindow->onPktArrival();
 
 	// check if it is probing packet pair
-		if (0 == (packet.m_iSeqNo & 0xF))
-			m_pRcvTimeWindow->probe1Arrival();
-		else if (1 == (packet.m_iSeqNo & 0xF))
-			m_pRcvTimeWindow->probe2Arrival();
+	if (0 == (packet.m_iSeqNo & 0xF))
+		m_pRcvTimeWindow->probe1Arrival();
+	else if (1 == (packet.m_iSeqNo & 0xF))
+		m_pRcvTimeWindow->probe2Arrival();
 
-		++ m_llTraceRecv;
-		++ m_llRecvTotal;
+	++ m_llTraceRecv;
+	++ m_llRecvTotal;
 
-		int32_t offset = CSeqNo::seqoff(m_iRcvLastAck, packet.m_iSeqNo);
-		if ((offset < 0) || (offset >= m_pRcvBuffer->getAvailBufSize()))
-			return -1;
+	int32_t offset = CSeqNo::seqoff(m_iRcvLastAck, packet.m_iSeqNo);
+	if ((offset < 0) || (offset >= m_pRcvBuffer->getAvailBufSize()))
+		return -1;
 
-		if (m_pRcvBuffer->addData(unit, offset) < 0)
-			return -1;
+	if (m_pRcvBuffer->addData(unit, offset) < 0)
+		return -1;
 
 	// Loss detection.
-		if (CSeqNo::seqcmp(packet.m_iSeqNo, CSeqNo::incseq(m_iRcvCurrSeqNo)) > 0)
-		{
+	if (CSeqNo::seqcmp(packet.m_iSeqNo, CSeqNo::incseq(m_iRcvCurrSeqNo)) > 0)
+	{
 		// If loss found, insert them to the receiver loss list
-			m_pRcvLossList->insert(CSeqNo::incseq(m_iRcvCurrSeqNo), CSeqNo::decseq(packet.m_iSeqNo));
+		m_pRcvLossList->insert(CSeqNo::incseq(m_iRcvCurrSeqNo), CSeqNo::decseq(packet.m_iSeqNo));
 
 		// pack loss list for NAK
-			int32_t lossdata[2];
-			lossdata[0] = CSeqNo::incseq(m_iRcvCurrSeqNo) | 0x80000000;
-			lossdata[1] = CSeqNo::decseq(packet.m_iSeqNo);
+		int32_t lossdata[2];
+		lossdata[0] = CSeqNo::incseq(m_iRcvCurrSeqNo) | 0x80000000;
+		lossdata[1] = CSeqNo::decseq(packet.m_iSeqNo);
 
 		// Generate loss report immediately.
-			sendCtrl(3, NULL, lossdata, (CSeqNo::incseq(m_iRcvCurrSeqNo) == CSeqNo::decseq(packet.m_iSeqNo)) ? 1 : 2);
+		sendCtrl(3, NULL, lossdata, (CSeqNo::incseq(m_iRcvCurrSeqNo) == CSeqNo::decseq(packet.m_iSeqNo)) ? 1 : 2);
 
-			int loss = CSeqNo::seqlen(m_iRcvCurrSeqNo, packet.m_iSeqNo) - 2;
-			m_iTraceRcvLoss += loss;
-			m_iRcvLossTotal += loss;
-		}
+		int loss = CSeqNo::seqlen(m_iRcvCurrSeqNo, packet.m_iSeqNo) - 2;
+		m_iTraceRcvLoss += loss;
+		m_iRcvLossTotal += loss;
+	}
 
 	// This is not a regular fixed size packet...
 	//an irregular sized packet usually indicates the end of a message, so send an ACK immediately
-		if (packet.getLength() != m_iPayloadSize)
-			CTimer::rdtsc(m_ullNextACKTime);
+	if (packet.getLength() != m_iPayloadSize)
+		CTimer::rdtsc(m_ullNextACKTime);
 
 	// Update the current largest sequence number that has been received.
 	// Or it is a retransmitted packet, remove it from receiver loss list.
-		if (CSeqNo::seqcmp(packet.m_iSeqNo, m_iRcvCurrSeqNo) > 0)
-			m_iRcvCurrSeqNo = packet.m_iSeqNo;
-		else
-		{
-			int split=0;
-			split=m_pRcvLossList->remove(packet.m_iSeqNo);
+	if (CSeqNo::seqcmp(packet.m_iSeqNo, m_iRcvCurrSeqNo) > 0)
+		m_iRcvCurrSeqNo = packet.m_iSeqNo;
+	else
+	{
+		int split=0;
+		split=m_pRcvLossList->remove(packet.m_iSeqNo);
 
-			if(split>1)
-			{      
-				int32_t lossdata[2];
-				lossdata[0] = m_pRcvLossList->m_piData1[split-2];
-				lossdata[1] = m_pRcvLossList->m_piData2[split-2];
-				sendCtrl(3,NULL,lossdata,(m_pRcvLossList->m_piData2[split-2] == -1) ? 1 : 2);
-
-			}
+		if(split>1)
+		{      
+			int32_t lossdata[2];
+			lossdata[0] = m_pRcvLossList->m_piData1[split-2];
+			lossdata[1] = m_pRcvLossList->m_piData2[split-2];
+			sendCtrl(3,NULL,lossdata,(m_pRcvLossList->m_piData2[split-2] == -1) ? 1 : 2);
 
 		}
-		return 0;
+
 	}
+	return 0;
+}
 
-	int CUDT::listen(sockaddr* addr, CPacket& packet)
-	{
-		if (m_bClosing)
-			return 1002;
+int CUDT::listen(sockaddr* addr, CPacket& packet)
+{
+	if (m_bClosing)
+		return 1002;
 
-		if (packet.getLength() != CHandShake::m_iContentSize)
-			return 1004;
+	if (packet.getLength() != CHandShake::m_iContentSize)
+		return 1004;
 
-		CHandShake hs;
-		hs.deserialize(packet.m_pcData, packet.getLength());
+	CHandShake hs;
+	hs.deserialize(packet.m_pcData, packet.getLength());
 
 	// SYN cookie
-		char clienthost[NI_MAXHOST];
-		char clientport[NI_MAXSERV];
-		getnameinfo(addr, (AF_INET == m_iVersion) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6), clienthost, sizeof(clienthost), clientport, sizeof(clientport), NI_NUMERICHOST|NI_NUMERICSERV);
+	char clienthost[NI_MAXHOST];
+	char clientport[NI_MAXSERV];
+	getnameinfo(addr, (AF_INET == m_iVersion) ? sizeof(sockaddr_in) : sizeof(sockaddr_in6), clienthost, sizeof(clienthost), clientport, sizeof(clientport), NI_NUMERICHOST|NI_NUMERICSERV);
 	int64_t timestamp = (CTimer::getTime() - m_StartTime) / 60000000; // secret changes every one minute
 	stringstream cookiestr;
 	cookiestr << clienthost << ":" << clientport << ":" << timestamp;
