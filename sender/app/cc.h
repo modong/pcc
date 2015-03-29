@@ -212,11 +212,13 @@ public:
 #ifdef DEBUGCC
                    cerr<<"make guess!"<<continous_guess_count<<endl;
 #endif
-#ifdef DEBUGCC
 			if(guess_time == 0 && continous_guess_count == MAX_COUNTINOUS_GUESS)
+            {
+#ifdef DEBUGCC
                    cerr<<"skip guess"<<endl;
 #endif
 				continous_guess_count =0;
+            }
 				if(guess_time == 0){
 					recording_guess_result = 1;
 					continous_guess_count++;
