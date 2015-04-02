@@ -105,10 +105,13 @@ public:
 #endif
 			// what is the next statement?
 			if(guess_time == 0 && continous_guess_count == MAX_COUNTINOUS_GUESS)
+			{
 #ifdef DEBUGCC
 				cerr<<"skip guess"<<endl;
 #endif
-			continous_guess_count =0;
+				continous_guess_count = 0;
+			}
+	
 			if(guess_time == 0){
 				recording_guess_result = 1; // start recording guess result
 				continous_guess_count++;
@@ -186,11 +189,10 @@ public:
 
 		utility = ((t-l)/time*(1-1/(1+exp(-1000*(l/t-0.05))))* (1-1/(1+exp(-80*(1-previous_rtt/m_iRTT)))) -1*l/time)/1*1000;
 		
-		// remove? previous_rtt = m_iRTT;
+		previous_rtt = m_iRTT;
 		
-		// why?
 		if(endMonitor == 0 && starting_phase)
-			utility /=2;
+			utility /= 2;
 #ifdef UTILITY_TRACE
 		cerr<<current_rate<<'\t'<<(t-l)*12/time/1000<<'\t'<<t<<'\t'<<l<<'\t'<<time<<"\t"<<utility<<"\t"<<m_iRTT<<endl;
 #endif
@@ -200,7 +202,7 @@ public:
 #endif
 		if(starting_phase){
 			// first guess?
-			if(endMonitor - 1 > start_previous_monitor){
+			if(endMonitor - start_previous_monitor > 1){
 				// why two cases?
 				if(start_previous_monitor == -1){
 #ifdef DEBUGCC
@@ -254,8 +256,6 @@ public:
 					utility_bucket[i]=utility;
 				}
 			}
-				//TODO to let the sender go back to the current sending rate, one way is to
-				//let the decision maker stop for another monitor period,which might not be a good option, let's try this first
 			if(recorded_number == NUMBER_OF_PROBE){
 				recorded_number = 0;
 				double decision = 0;
@@ -275,19 +275,15 @@ public:
 				}else{
 					change_direction = decision>0 ? 1 : -1;
 					target_monitor = (current+1)%MAX_MONITOR_NUMBER;
-					moving_phase_initial = 1; // what is variable?
+					moving_phase_initial = 1;
 					change_intense = 1;
 					change_amount = (continous_guess_count/2+1)*change_intense*change_direction * GRANULARITY * current_rate;
 					previous_utility = 0;
-					// remove ? continous_guess_count--; 
 					continous_guess_count=0;
-					// if(continous_guess_count < 0)
-					// 	continous_guess_count = 0;
-					// remove?
+
 					previous_rate = current_rate;
 					current_rate = current_rate + change_amount;
 					
-					// repeart? target_monitor = (current+1)%MAX_MONITOR_NUMBER;
 					setRate(current_rate);
 					recording_guess_result = 0;
 #ifdef DEBUGCC
@@ -364,8 +360,7 @@ public:
 #ifdef DEBUGCC
 			cerr<<"moving faster"<<endl;
 #endif
-			previous_utility = utility;
-			previous_rate = current_rate;
+			
 			change_amount = change_intense * GRANULARITY * current_rate * change_direction;
 
 			if(utility > previous_utility){
@@ -377,7 +372,9 @@ public:
 				make_guess = 1;
 				current_rate = current_rate - change_amount;
 			}
-
+			
+			previous_rate = current_rate;
+			previous_utility = utility;
 			setRate(current_rate);
 		}
 	}

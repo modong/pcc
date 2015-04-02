@@ -292,7 +292,6 @@ private:
 private: // monitor
    bool monitor;  
 
-   int test; // remove?
    int current_monitor, previous_monitor, monitor_ttl, left_monitor; // what is left_monitor?
    double start_time[100], end_time[100], end_transmission_time[100];
    // for state, 1=sending, 2= waiting, 3=finished
