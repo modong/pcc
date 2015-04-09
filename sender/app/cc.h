@@ -213,10 +213,12 @@ public:
                    cerr<<"make guess!"<<continous_guess_count<<endl;
 #endif
 			if(guess_time == 0 && continous_guess_count == MAX_COUNTINOUS_GUESS)
+            {
 #ifdef DEBUGCC
                    cerr<<"skip guess"<<endl;
 #endif
 				continous_guess_count =0;
+            }
 				if(guess_time == 0){
 					recording_guess_result = 1;
 					continous_guess_count++;
@@ -294,7 +296,7 @@ cerr<<"clear continous send"<<endl;
 if(previous_rtt==0)
 previous_rtt = m_iRTT;
 //utility = ((t-l)/time*(1-1/(1+exp(-100*(l/t-0.05))))-1*l/time);
-utility = ((t-l)/time*(1-1/(1+exp(-1000*(l/t-0.05))))* (1-1/(1+exp(-80*(1-previous_rtt/m_iRTT)))) -1*l/time)/1*1000;
+utility = ((t-l)/time*(1-1/(1+exp(-100*(l/t-0.05))))* (1-1/(1+exp(-10*(1-previous_rtt/m_iRTT)))) -1*l/time)/m_iRTT*1000;
 previous_rtt = m_iRTT;
 if(endMonitor == 0 && starting_phase)
 utility /=2;
@@ -427,7 +429,7 @@ utility /=2;
 		}
 
 		if(moving_phase_initial && endMonitor == target_monitor){
-                if(current_rate>(t*12/time/1000+10) && current_rate > 200)
+                if(current_rate>(t*12/time/1000+30) && current_rate > 200)
                    {
                 current_rate=t*12/time/1000;
 
@@ -466,7 +468,7 @@ cerr<<"first time moving"<<endl;
 
 		if(moving_phase && endMonitor == target_monitor){
 
-                if(current_rate>(t*12/time/1000+10) && current_rate > 200)
+                if(current_rate>(t*12/time/1000+30) && current_rate > 200)
                    {
                 current_rate=t*12/time/1000;
 
