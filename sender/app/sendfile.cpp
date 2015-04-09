@@ -19,6 +19,12 @@ void* sendfile(void*);
 DWORD WINAPI sendfile(LPVOID);
 #endif
 
+#ifndef WIN32
+void* monitor(void*);
+#else
+DWORD WINAPI monitor(LPVOID);
+#endif
+
 int main(int argc, char* argv[])
 {
 
@@ -51,6 +57,12 @@ int main(int argc, char* argv[])
       cout << "connect: " << UDT::getlasterror().getErrorMessage() << endl;
       return -1;
    }
+
+   #ifndef WIN32
+      pthread_create(new pthread_t, NULL, monitor, &fhandle);
+   #else
+      CreateThread(NULL, 0, monitor, &client, 0, NULL);
+   #endif
 
    freeaddrinfo(peer);
      // using CC method
@@ -94,3 +106,49 @@ int main(int argc, char* argv[])
       return 0;
    #endif
 }
+
+#ifndef WIN32
+void* monitor(void* s)
+#else
+DWORD WINAPI monitor(LPVOID s)
+#endif
+{
+   UDTSOCKET u = *(UDTSOCKET*)s;
+
+   UDT::TRACEINFO perf;
+
+   cout << "SendRate(Mb/s)\tRTT(ms)\tCWnd\tPktSndPeriod(us)\tRecvACK\tRecvNAK" << endl;
+   int i=0;
+   while (true)
+   {
+      #ifndef WIN32
+         usleep(1000000);
+      #else
+         Sleep(1000);
+      #endif
+    i++;
+    if(i>10000)
+        {
+        exit(1);
+        }
+      if (UDT::ERROR == UDT::perfmon(u, &perf))
+      {
+         cout << "perfmon: " << UDT::getlasterror().getErrorMessage() << endl;
+         break;
+      }
+    cout << perf.mbpsSendRate << "\t\t"
+           << perf.msRTT << "\t"
+           <<  perf.pktSentTotal << "\t"
+           << perf.pktSndLossTotal << "\t\t\t"
+           << perf.pktRecvACKTotal << "\t"
+           << perf.pktRecvNAKTotal << endl;
+
+   }
+
+   #ifndef WIN32
+      return NULL;
+   #else
+      return 0;
+   #endif
+}
+
