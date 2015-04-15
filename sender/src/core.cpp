@@ -2377,6 +2377,8 @@ void CUDT::processCtrl(CPacket& ctrlpkt)
 		int32_t* tsn_payload = (int32_t *)(ctrlpkt.m_pcData);
                 int last_position = (int)(ctrlpkt.getLength() / 4)-1;
                 int Mon = tsn_payload[last_position]>>16;
+                rtt_count[Mon]++;
+                rtt_value[Mon]+= int(CTimer::getTime() - m_StartTime) - send_timestamp[Mon][tsn_payload[last_position]&0xFFFF];
                 if(latency_time_start[Mon] == 0){
                 latency_time_start[Mon]=ctrlpkt.m_iTimeStamp;
                 latency_seq_start[Mon] = tsn_payload[last_position] & 0xFFFF;
@@ -2421,7 +2423,11 @@ void CUDT::processCtrl(CPacket& ctrlpkt)
 						//cerr<<"Killed monitor"<<left[tmp]<<endl;
 //						cerr<<"latency info"<<" "<<double(latency_time_end[tmp]-latency_time_start[tmp])/left[tmp]/m_pCC->m_dPktSndPeriod<<endl;
 //						cerr<<"latency info"<<" "<<latency_time_end[tmp]<<" "<<latency_time_start[tmp]<<" "<<m_pCC->m_dPktSndPeriod<<" "<<latency_seq_end[tmp]<<" "<<latency_seq_start[tmp]<<endl;
-						m_pCC->onMonitorEnds(total[tmp],total[tmp]-left[tmp],(end_transmission_time[tmp]-start_time[tmp])/1000000,current_monitor,tmp);
+						if(rtt_count[Mon]==0){
+                        rtt_value[Mon]=0;
+                        rtt_count[Mon]=1;
+                        }
+						m_pCC->onMonitorEnds(total[tmp],total[tmp]-left[tmp],(end_transmission_time[tmp]-start_time[tmp])/1000000,current_monitor,tmp, rtt_value[Mon]/double(rtt_count[Mon]));
 						m_ullInterval = (uint64_t)(m_pCC->m_dPktSndPeriod * m_ullCPUFrequency);
 						if (!left_monitor) break;
 					}
@@ -2645,9 +2651,11 @@ m_pSndLossList->insert(const_cast<int32_t&>(m_iSndLastAck), const_cast<int32_t&>
 	}
 
 	packet.m_iTimeStamp = int(CTimer::getTime() - m_StartTime);
+    send_timestamp[packet.m_iMsgNo>>16][packet.m_iMsgNo & 0xFFFF] = packet.m_iTimeStamp;
 	packet.m_iID = m_PeerID;
 	packet.setLength(payload);
 	m_pCC->onPktSent(&packet);
+
 
 	++ m_llSentTotal;
 	++ m_llTraceSent;
@@ -3014,8 +3022,14 @@ void CUDT::start_monitor(int length)
 	//		end_monitor(false);
 	monitor_ttl = length;
 	left[current_monitor]=0;
+    rtt_count[current_monitor]=0;
+    rtt_value[current_monitor]=0;
+
 	for (int i=0;i<length;++i)
-		recv_ack[current_monitor][i] = false;
+    {
+        recv_ack[current_monitor][i] = false;
+        send_timestamp[current_monitor][i] = 0;
+    }
 	lost[current_monitor] = 0;
         latency_time_start[current_monitor] = 0;
         latency_time_end[current_monitor] = 0;
