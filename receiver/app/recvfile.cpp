@@ -20,9 +20,9 @@ DWORD WINAPI sendfile(LPVOID);
 
 int main(int argc, char* argv[])
 {
-   if ((2 < argc) || ((2 == argc) && (0 == atoi(argv[1]))))
+   if ((3 < argc) || ((2 == argc) && (0 == atoi(argv[1]))))
    {
-      cout << "usage: sendfile [server_port]" << endl;
+      cout << "usage: recvfile [server_port] [bind_ip]" << endl;
       return 0;
    }
 
@@ -41,7 +41,11 @@ int main(int argc, char* argv[])
    if (2 == argc)
       service = argv[1];
 
-   if (0 != getaddrinfo(NULL, service.c_str(), &hints, &res))
+   char * node = NULL;
+   if (3 == argc)
+       node = argv[2];
+       
+   if (0 != getaddrinfo(node, service.c_str(), &hints, &res))
    {
       cout << "illegal port number or port is busy.\n" << endl;
       return 0;
