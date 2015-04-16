@@ -1,5 +1,6 @@
 #PCC: Re-architecting Congestion Control for High Performance
 
+##This is a fork of PCC, for upstream, please refer to https://github.com/modong/pcc
 
 ## How to use PCC
 
