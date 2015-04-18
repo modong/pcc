@@ -266,29 +266,29 @@ private:
       //    None.
 
    void sample(CPerfMon* perf, bool clear = true);
-   
+
    // start monitor function
    // length: the length of the monitoration
    void start_monitor(int length);
-   
+
    // end monitor function
    // utility: whether should we call utility function
    void end_monitor(bool call_utility);
-   
+
    // check this loss happened in which monitor
    void monitor_loss(int loss);
-   
+
    // check whether this ack/loss feedback end one monitor
    void check_monitor_end_ack(int ack);
    void check_monitor_end_loss(int loss);
-   
+
    // add the seqNo into retransmission list which is used to
    // judge in which monitor the lost pkt has been sent
    void add_retransmission(int seqNo, int monitor);
-   
+
    void reduce_retransmission_list(int ack);
-   
-   
+
+
 private: // monitor
    int current_monitor, previous_monitor, monitor_ttl;
 //   int start_seq[100], start_retransmission[100], end_seq[100], end_retransmission[100];
@@ -304,9 +304,12 @@ private: // monitor
    int32_t time_interval[100];
    int lossptr;
    bool recv_ack[100][30000];
-   bool monitor;  
+   uint64_t send_timestamp[100][30000];
+   int rtt_count[100];
+   uint64_t rtt_value[100];
+   bool monitor;
    int test;
-//   int retransmission_list[60000], max_retransmission_list, min_retransmission_list_seqNo; 
+//   int retransmission_list[60000], max_retransmission_list, min_retransmission_list_seqNo;
 
 private:
    static CUDTUnited s_UDTUnited;               // UDT global management base

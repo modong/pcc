@@ -284,7 +284,7 @@ cerr<<"clear continous send"<<endl;
 
 	}
 
-	virtual void onMonitorEnds(int total, int loss, double time, int current, int endMonitor){
+	virtual void onMonitorEnds(int total, int loss, double time, int current, int endMonitor, double rtt){
 
 		double utility;
 		double t=total;
@@ -293,11 +293,15 @@ cerr<<"clear continous send"<<endl;
 		if(l<0)
 			l=0;
 //utility = ((t-l)/time-20*l/time);
+cerr<<rtt<<endl;
+if(rtt==0) {
+cerr<<"RTT cannot be 0!!!"<<endl;
+}
 if(previous_rtt==0)
-previous_rtt = m_iRTT;
+previous_rtt = rtt;
 //utility = ((t-l)/time*(1-1/(1+exp(-100*(l/t-0.05))))-1*l/time);
-utility = ((t-l)/time*(1-1/(1+exp(-100*(l/t-0.05))))* (1-1/(1+exp(-10*(1-previous_rtt/m_iRTT)))) -1*l/time)/m_iRTT*1000;
-previous_rtt = m_iRTT;
+utility = ((t-l)/time*(1-1/(1+exp(-100*(l/t-0.05))))* (1-1/(1+exp(-10*(1-previous_rtt/rtt)))) -1*l/time)/rtt*1000;
+previous_rtt = rtt;
 if(endMonitor == 0 && starting_phase)
 utility /=2;
 #ifdef UTILITY_TRACE

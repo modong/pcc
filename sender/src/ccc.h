@@ -137,7 +137,7 @@ public:
 
    virtual void processCustomMsg(const CPacket*) {}
 
-   virtual void onMonitorEnds(int total, int loss, double time, int skip,int num){}
+   virtual void onMonitorEnds(int total, int loss, double time, int skip,int num, double rtt){}
 
    virtual void onMonitorStart(int monitor_number){}
 
