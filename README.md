@@ -1,7 +1,7 @@
 #PCC: Re-architecting Congestion Control for High Performance
 
 ###Read before use:
-The utility function in use in the current code base is a latency senstive one we are actively experimenting. To switch back to the default utility function, you just need one line of code change in cc.h. Uncomment cc.h:302 and comment out cc.h:303. (Proof of flexibility :))
+The utility function in use in the current code base is a latency senstive one we are actively experimenting. To switch back to the default utility function, you just need one line of code change in cc.h. Uncomment cc.h:302 and comment out cc.h:303. And do a make clean;make (Proof of flexibility :))
 
 ## How to use PCC
 
