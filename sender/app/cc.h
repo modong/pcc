@@ -4,7 +4,7 @@
 #include<cmath>
 
 #define MAXCOUNT 1000
-#define GRANULARITY 0.01
+#define GRANULARITY 0.02
 #define MUTATION_TH 300
 #define JUMP_RANGE 0.05
 #define NUMBER_OF_PROBE 4
