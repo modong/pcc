@@ -3,6 +3,7 @@
    #include <cstdlib>
    #include <cstring>
    #include <netdb.h>
+   #include <signal.h>
 #else
    #include <winsock2.h>
    #include <ws2tcpip.h>
@@ -22,11 +23,26 @@ void* monitor(void* s);
 DWORD WINAPI recvdata(LPVOID);
 #endif
 
+// for logging
+char* file_name;
+std::ofstream logger;
+void segfault_sigaction(int signal, siginfo_t *si, void *arg);
+void writeToLog(std::ofstream &logFile, int64_t relativeTime, double rate, double rtt,
+                     int window, int64_t sent, int loss);
+
 int main(int argc, char* argv[])
 {
-   if ((1 != argc) && ((2 != argc) || (0 == atoi(argv[1]))))
+   // catching segmentation faults
+   struct sigaction sa;
+   memset(&sa, 0, sizeof(struct sigaction));
+   sigemptyset(&sa.sa_mask);
+   sa.sa_sigaction = segfault_sigaction;
+   sa.sa_flags   = SA_SIGINFO;
+   sigaction(SIGSEGV, &sa, NULL);
+
+   if ( (3 != argc) || (0 == atoi(argv[1])) )
    {
-      cout << "usage: appserver [server_port]" << endl;
+      cout << "usage: appserver server_port log_file" << endl;
       return 0;
    }
 
@@ -43,16 +59,15 @@ int main(int argc, char* argv[])
    hints.ai_socktype = SOCK_STREAM;
    //hints.ai_socktype = SOCK_DGRAM;
 
-   string service("9000");
-   if (2 == argc)
-      service = argv[1];
+   string service;
+   service = argv[1];
 
    if (0 != getaddrinfo(NULL, service.c_str(), &hints, &res))
    {
       cout << "illegal port number or port is busy.\n" << endl;
       return 0;
    }
-
+   file_name = argv[2];
    UDTSOCKET serv = UDT::socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 
    // UDT Options
@@ -103,7 +118,6 @@ int main(int argc, char* argv[])
          CreateThread(NULL, 0, recvdata, new UDTSOCKET(recver), 0, NULL);
       #endif
    }
-
    UDT::close(serv);
 
    return 0;
@@ -145,7 +159,7 @@ DWORD WINAPI recvdata(LPVOID usocket)
    }
 
    delete [] data;
-
+   logger.close();
    UDT::close(recver);
 
    #ifndef WIN32
@@ -160,16 +174,16 @@ void* monitor(void* s)
 DWORD WINAPI monitor(LPVOID s)
 #endif
 {
+   logger.open(file_name);
+   logger << "time," << "rate," << "rtt," << "loss," << "total," << "tloss\n";
    UDTSOCKET u = *(UDTSOCKET*)s;
 
    UDT::TRACEINFO perf;
 
-   cout << "SendRate(Mb/s)\tRTT(ms)\tCWnd\tPktSndPeriod(us)\tRecvACK\tRecvNAK" << endl;
-
    while (true)
    {
       #ifndef WIN32
-         sleep(1);
+         usleep(10000);
       #else
          Sleep(1000);
       #endif
@@ -180,8 +194,8 @@ DWORD WINAPI monitor(LPVOID s)
          break;
       }
 
-      //cout << perf.pktRecvTotal << "\t\t"
-      //     << perf.pktRecvNAKTotal << endl;
+      writeToLog(logger, perf.msTimeStamp, perf.mbpsRecvRate, perf.msRTT,
+                           perf.pktRcvLoss, perf.pktRecvTotal, perf.pktRcvLossTotal);
    }
 
    #ifndef WIN32
@@ -189,4 +203,23 @@ DWORD WINAPI monitor(LPVOID s)
    #else
       return 0;
    #endif
+}
+
+void writeToLog(std::ofstream &logFile, int64_t relativeTime, double rate, double rtt,
+                     int window, int64_t sent, int loss)
+{
+   logFile << relativeTime << "," << rate;
+   logFile << "," << rtt;
+   logFile << "," << window;
+   logFile << "," << sent;
+   logFile << "," << loss;
+   logFile << "\n";
+
+   return;
+}
+
+void segfault_sigaction(int signal, siginfo_t *si, void *arg)
+{
+   logger.close();
+   exit(0);
 }

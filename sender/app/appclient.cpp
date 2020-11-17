@@ -3,6 +3,7 @@
    #include <cstdlib>
    #include <cstring>
    #include <netdb.h>
+   #include <signal.h>
 #else
    #include <winsock2.h>
    #include <ws2tcpip.h>
@@ -20,14 +21,29 @@ void* monitor(void*);
 DWORD WINAPI monitor(LPVOID);
 #endif
 
+// for logging
+char* file_name;
+std::ofstream logger;
+void segfault_sigaction(int signal, siginfo_t *si, void *arg);
+void writeToLog(std::ofstream &logFile, int64_t relativeTime, double rate, double rtt,
+                     int window, int64_t sent, int loss);
+
 int main(int argc, char* argv[])
 {
-   if ((3 != argc) || (0 == atoi(argv[2])))
+   // catching segmentation faults
+   struct sigaction sa;
+   memset(&sa, 0, sizeof(struct sigaction));
+   sigemptyset(&sa.sa_mask);
+   sa.sa_sigaction = segfault_sigaction;
+   sa.sa_flags   = SA_SIGINFO;
+   sigaction(SIGSEGV, &sa, NULL);
+
+   if ((4 != argc) || (0 == atoi(argv[2])))
    {
-      cout << "usage: appclient server_ip server_port" << endl;
+      cout << "usage: appclient server_ip server_port log_file" << endl;
       return 0;
    }
-//sleep(1500);
+   //sleep(1500);
    // use this function to initialize the UDT library
    UDT::startup();
 
@@ -76,6 +92,7 @@ int main(int argc, char* argv[])
       cout << "incorrect server/peer address. " << argv[1] << ":" << argv[2] << endl;
       return 0;
    }
+   file_name = argv[3];
 
    // connect to the server, implict bind
    if (UDT::ERROR == UDT::connect(client, peer->ai_addr, peer->ai_addrlen))
@@ -119,7 +136,7 @@ int main(int argc, char* argv[])
       if (ssize < size)
          break;
    }
-
+   logger.close();
    UDT::close(client);
 
    delete [] data;
@@ -136,35 +153,31 @@ void* monitor(void* s)
 DWORD WINAPI monitor(LPVOID s)
 #endif
 {
+   logger.open(file_name);
+    logger << "time," << "rate," << "rtt," << "pktsflight," << "total," << "tloss\n";
    UDTSOCKET u = *(UDTSOCKET*)s;
 
    UDT::TRACEINFO perf;
-
-   cout << "SendRate(Mb/s)\tRTT(ms)\tCWnd\tPktSndPeriod(us)\tRecvACK\tRecvNAK" << endl;
    int i=0;
    while (true)
    {
       #ifndef WIN32
-         usleep(1000000);
+         usleep(10000);
       #else
          Sleep(1000);
       #endif
-    i++;
-    if(i>10000)
-        {
+      i++;
+      if(i > 10000)
+      {
         exit(1); 
-        }
+      }
       if (UDT::ERROR == UDT::perfmon(u, &perf))
       {
          cout << "perfmon: " << UDT::getlasterror().getErrorMessage() << endl;
          break;
       }
-    cout << perf.mbpsSendRate << "\t\t"
-           << perf.msRTT << "\t"
-           <<  perf.pktSentTotal << "\t"
-           << perf.pktSndLossTotal << "\t\t\t"
-           << perf.pktRecvACKTotal << "\t"
-           << perf.pktRecvNAKTotal << endl;
+      writeToLog(logger, perf.msTimeStamp, perf.mbpsSendRate, perf.msRTT,
+                           perf.pktFlightSize, perf.pktSentTotal, perf.pktSndLossTotal);
 
    }
 
@@ -173,4 +186,24 @@ DWORD WINAPI monitor(LPVOID s)
    #else
       return 0;
    #endif
+}
+
+
+void writeToLog(std::ofstream &logFile, int64_t relativeTime, double rate, double rtt,
+                     int window, int64_t sent, int loss)
+{
+   logFile << relativeTime << "," << rate;
+   logFile << "," << rtt;
+   logFile << "," << window;
+   logFile << "," << sent;
+   logFile << "," << loss;
+   logFile << "\n";
+
+   return;
+}
+
+void segfault_sigaction(int signal, siginfo_t *si, void *arg)
+{
+   logger.close();
+   exit(0);
 }

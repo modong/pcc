@@ -1,0 +1,15 @@
+*.o
+*.a
+*.so
+appclient
+appserver
+incast_client
+incastserver
+test
+udt
+recvfile
+sendfile
+temp_log.txt
+recv_log.txt
+sender_log.txt
+.vscode
